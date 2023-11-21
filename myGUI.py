@@ -47,8 +47,8 @@ def Create_Line_Graph (numbers):
     canvas_widget.pack()
 
 
-#graph part=============================================
-    
+
+#Main program part============================================= 
 
 # Create the main tkinter window
 window = tk.Tk()
