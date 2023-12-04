@@ -269,15 +269,13 @@ class doc_graph:
     edges = self.check_seq(seq)
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
-      print("Edges == 0")
         #If no edges had a positive filter response try sequence without its first item.
         #Repeat until an edge(s) has a positive response.
       for k in range(len(seq)):
         edges = self.check_seq(seq[k:])
         if len(edges) > 0: break
     if len(edges) == 1:
-      print("Edges == 1")
-      #If only 1 edge has a positive filter response its associated word is predicted.
+        #If only 1 edge has a positive filter response its associated word is predicted.
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:

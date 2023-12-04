@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
-from learning_page import create_learning_page
-from prediction_page import create_prediction_page
-from evaluation_page import create_evaluation_page
+from pages.learning_page import create_learning_page
+from pages.prediction_page import create_prediction_page
+from pages.evaluation_page import create_evaluation_page
 
 def main():
     window = tk.Tk()

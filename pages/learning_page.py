@@ -23,7 +23,7 @@ def create_line_graph(numbers, ax=None, canvas=None):
 def get_numbers():
     input_values = entry.get()
     numbers = [int(num) for num in input_values.split(',')]
-    output = g.gen_next(numbers, 5)
+    output = doc.gen_next(numbers, 5)
     result_label.config(text=f"Result: {output}")
     create_line_graph(numbers, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
 
@@ -36,18 +36,19 @@ def upload_file():
             entry.insert(0, content)
 
 def create_learning_page(notebook):
-    global learning_page, entry, create_line_graph, result_label, g
+    global learning_page, entry, create_line_graph, result_label, doc
     learning_page = tk.Frame(notebook)
     notebook.add(learning_page, text="Learning Phase")
-    mynums = [x for x in range(10000)]
     def fibo (n):
         if n <=1:
             return n
         else:
             return fibo(n-1)+fibo(n-2)
-    fiboNum = [fibo(i) for i in range(30)]
-    g = doc_graph(5, 'wrand')
-    g.add_doc(fiboNum)
+    # fiboNum = [fibo(i) for i in range(30)]
+    num = [i for i in range(5)]
+    doc = doc_graph(5, 'wrand')
+    # doc.add_doc(fiboNum)
+    doc.add_doc(num)
 
     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
     upload_button.pack()
