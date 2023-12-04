@@ -281,8 +281,7 @@ class doc_graph:
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:
-      print("Edges > 1")
-      #If more than 1 edge has a positive response choose based on generation mode.
+        #If more than 1 edge has a positive response choose based on generation mode.
       if self.gen_mode == 'max':
         #Select the edge in edges with the max Pi
         emax = 0
@@ -298,10 +297,6 @@ class doc_graph:
       elif self.gen_mode == 'rand':
         #Randomly select from the set of edges.
         edge = random.choice(edges)
-        prompt.append(edge[1])
-
-      elif self.gen_mode == 'weight_rand':
-        edge = random.choice(self.edge_table)
         prompt.append(edge[1])
 
       return prompt
