@@ -4,28 +4,35 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Graph_Learner import doc_graph
 
-def create_line_graph(numbers, ax=None, canvas=None):
-    if ax is None:
-        fig, ax = plt.subplots()
-        ax.set_xlabel('Index')
-        ax.set_ylabel('Values')
-        ax.set_title('Input Numbers')
+
+
+def create_line_graph(numbers, learning_page):
+    fig, ax = plt.subplots()
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Values')
+    ax.set_title('Input Numbers')
 
     ax.plot(range(len(numbers)), numbers, marker='o')
 
-    if canvas:
-        canvas.get_tk_widget().destroy()
+    # Destroy the old canvas widget (if any)
+    if hasattr(create_line_graph, 'canvas') and create_line_graph.canvas:
+        create_line_graph.canvas.get_tk_widget().destroy()
 
-    canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
-    canvas_widget = canvas.get_tk_widget()
+    # Create a new canvas widget
+    create_line_graph.canvas = FigureCanvasTkAgg(fig, master=learning_page)
+    canvas_widget = create_line_graph.canvas.get_tk_widget()
     canvas_widget.pack()
+
 
 def get_numbers():
     input_values = entry.get()
     numbers = [int(num) for num in input_values.split(',')]
+    g = doc_graph(5, 'wrand')
+    g.add_doc(numbers)
+    numbers.pop() #should be remove after we get a larger input data
     output = g.gen_next(numbers, 5)
     result_label.config(text=f"Result: {output}")
-    create_line_graph(numbers, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
+    create_line_graph(numbers,learning_page)
 
 def upload_file():
     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
@@ -36,19 +43,11 @@ def upload_file():
             entry.insert(0, content)
 
 def create_learning_page(notebook):
-    global learning_page, entry, create_line_graph, result_label, g
+    global learning_page, entry, create_line_graph, result_label
+
     learning_page = tk.Frame(notebook)
     notebook.add(learning_page, text="Learning Phase")
-    mynums = [x for x in range(10000)]
-    def fibo (n):
-        if n <=1:
-            return n
-        else:
-            return fibo(n-1)+fibo(n-2)
-    fiboNum = [fibo(i) for i in range(30)]
-    g = doc_graph(5, 'wrand')
-    g.add_doc(fiboNum)
-
+    
     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
     upload_button.pack()
 

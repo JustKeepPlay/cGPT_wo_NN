@@ -256,6 +256,7 @@ class doc_graph:
       seq = tuple(prompt[-h:])
     else:
       seq = tuple(prompt)
+    print("node to edge table" , self.node_to_edge_table)
     assert seq[-1] in self.node_to_edge_table, "Last Item in Sequence Not Encountered in Training"
       #Throws error when a node was not encountered in training
       #and therefore has no associated edges.
@@ -307,9 +308,7 @@ class doc_graph:
         for w in weights:
           probs.append(w / totalWeight)
         edge = random.choices(edges,probs)
-        prompt.append(edge[0][1])
-      
-        
+        prompt.append(edge[0][1])        
 
       return prompt
 
