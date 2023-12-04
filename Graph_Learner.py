@@ -173,6 +173,7 @@ class doc_graph:
       if i%12500 == 0:
         print(str(100.0*(i+1)/ldoc)+'% Complete.')
         print(str(i) + ' of ' + str(ldoc))
+        print('gen_mode = ', self.gen_mode)
       #Iterate through the document looking at each word w
       key = (w,doc[i+1])
       #Create a key for edge (W(n),W(n+1))
@@ -182,6 +183,7 @@ class doc_graph:
       else:
         #otherwise create a new edge set
         self.node_to_edge_table[w] = (key,)
+
       if key in self.edge_table:
         #if edge has been seen before load its hash set Pi and bloom filter
         hashes = set(self.edge_table[key])
@@ -222,6 +224,9 @@ class doc_graph:
       self.edge_table[key] = hashes
     #return doc
 
+    print(self.node_to_edge_table)
+
+
   def add_text(self,prompt,text,h=5):
     if len(prompt) > h:
       prompt[-h:].extend(text)
@@ -247,6 +252,7 @@ class doc_graph:
 
   def gen_next(self,prompt,h=5):
     #Given a prompt generate the next word and return prompt + that word.
+    print("This is gen_next")
     ltext = len(prompt)
     if ltext < h:
         #Adds none type ot start of seq when prompt is < h
@@ -263,30 +269,39 @@ class doc_graph:
     edges = self.check_seq(seq)
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
+      print("Edges == 0")
         #If no edges had a positive filter response try sequence without its first item.
         #Repeat until an edge(s) has a positive response.
       for k in range(len(seq)):
         edges = self.check_seq(seq[k:])
         if len(edges) > 0: break
     if len(edges) == 1:
-        #If only 1 edge has a positive filter response its associated word is predicted.
+      print("Edges == 1")
+      #If only 1 edge has a positive filter response its associated word is predicted.
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:
-        #If more than 1 edge has a positive response choose based on generation mode.
+      print("Edges > 1")
+      #If more than 1 edge has a positive response choose based on generation mode.
       if self.gen_mode == 'max':
         #Select the edge in edges with the max Pi
         emax = 0
-        edge = (None,None)
+        edge = (None, None)
         for e in edges:
+          print(e, "\n")
           x = len(self.edge_table[e])
           if x > emax:
             emax = x
             edge = e
         prompt.append(edge[1])
+
       elif self.gen_mode == 'rand':
         #Randomly select from the set of edges.
         edge = random.choice(edges)
+        prompt.append(edge[1])
+
+      elif self.gen_mode == 'weight_rand':
+        edge = random.choice(self.edge_table)
         prompt.append(edge[1])
 
       return prompt
@@ -303,6 +318,7 @@ class doc_graph:
       if bfilter.check(seq):
         fedges.append(e)
     return fedges
+    
 
 def pickle_graph(g,filename='default'):
     #Save graph g as a python pickle type

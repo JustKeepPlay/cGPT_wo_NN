@@ -24,7 +24,7 @@ else:
     #Add support for inputting h and mode
 
 #Train the graph
-g = doc_graph(h,mode)
+g = doc_graph(h=5, gen_mode="max")
 g.add_doc(doc)
 
 prompt_in = input("Add Prompt (Either file or a text sequence in quotes..):")
@@ -37,7 +37,7 @@ else:
 
 n = int(input("How many new words to generate:"))
 
-out = g.gen_next_n(prompt,n,h)
+out = g.gen_next_n(prompt,n,h=5)
 print(seq_to_sentence(out))
 
 while True:
@@ -49,5 +49,5 @@ while True:
         nn = int(s_in[-1])
     else:
         nn = 1
-    out = g.gen_next_n(out,nn,h)
+    out = g.gen_next_n(out,nn,h=5)
     print(seq_to_sentence(out))
