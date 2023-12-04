@@ -173,7 +173,6 @@ class doc_graph:
       if i%12500 == 0:
         print(str(100.0*(i+1)/ldoc)+'% Complete.')
         print(str(i) + ' of ' + str(ldoc))
-        print('gen_mode = ', self.gen_mode)
       #Iterate through the document looking at each word w
       key = (w,doc[i+1])
       #Create a key for edge (W(n),W(n+1))
@@ -183,7 +182,6 @@ class doc_graph:
       else:
         #otherwise create a new edge set
         self.node_to_edge_table[w] = (key,)
-
       if key in self.edge_table:
         #if edge has been seen before load its hash set Pi and bloom filter
         hashes = set(self.edge_table[key])
@@ -224,9 +222,6 @@ class doc_graph:
       self.edge_table[key] = hashes
     #return doc
 
-    print(self.node_to_edge_table)
-
-
   def add_text(self,prompt,text,h=5):
     if len(prompt) > h:
       prompt[-h:].extend(text)
@@ -252,7 +247,6 @@ class doc_graph:
 
   def gen_next(self,prompt,h=5):
     #Given a prompt generate the next word and return prompt + that word.
-    print("This is gen_next")
     ltext = len(prompt)
     if ltext < h:
         #Adds none type ot start of seq when prompt is < h
@@ -283,9 +277,8 @@ class doc_graph:
       if self.gen_mode == 'max':
         #Select the edge in edges with the max Pi
         emax = 0
-        edge = (None, None)
+        edge = (None,None)
         for e in edges:
-          print(e, "\n")
           x = len(self.edge_table[e])
           if x > emax:
             emax = x
@@ -296,6 +289,27 @@ class doc_graph:
         #Randomly select from the set of edges.
         edge = random.choice(edges)
         prompt.append(edge[1])
+
+      elif self.gen_mode == 'wrand':
+        #Randomly select edge based on the probability. 
+        print("This is wrand")
+        totalWeight = 0
+        probs = []
+        weights = []
+        for e in edges:
+          #totalWeight is the sum of how often the edge have been seen
+          #sum = w1+w2+w3+....wn
+          totalWeight += len(self.edge_table[e])
+          #weightE is weight of the current edge
+          weightE = len(self.edge_table[e])
+          weights.append(weightE)
+        
+        for w in weights:
+          probs.append(w / totalWeight)
+        edge = random.choices(edges,probs)
+        prompt.append(edge[0][1])
+      
+        
 
       return prompt
 
@@ -311,7 +325,6 @@ class doc_graph:
       if bfilter.check(seq):
         fedges.append(e)
     return fedges
-    
 
 def pickle_graph(g,filename='default'):
     #Save graph g as a python pickle type
