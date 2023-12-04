@@ -273,6 +273,7 @@ class doc_graph:
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:
+      print('kuy')
         #If more than 1 edge has a positive response choose based on generation mode.
       if self.gen_mode == 'max':
         #Select the edge in edges with the max Pi
@@ -284,10 +285,32 @@ class doc_graph:
             emax = x
             edge = e
         prompt.append(edge[1])
+
       elif self.gen_mode == 'rand':
         #Randomly select from the set of edges.
         edge = random.choice(edges)
         prompt.append(edge[1])
+
+      elif self.gen_mode == 'wrand':
+        #Randomly select edge based on the probability. 
+        print("This is wrand")
+        totalWeight = 0
+        probs = []
+        weights = []
+        for e in edges:
+          #totalWeight is the sum of how often the edge have been seen
+          #sum = w1+w2+w3+....wn
+          totalWeight += len(self.edge_table[e])
+          #weightE is weight of the current edge
+          weightE = len(self.edge_table[e])
+          weights.append(weightE)
+        
+        for w in weights:
+          probs.append(w / totalWeight)
+        edge = random.choices(edges,probs)
+        prompt.append(edge[0][1])
+      
+        
 
       return prompt
 
