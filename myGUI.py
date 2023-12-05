@@ -43,18 +43,27 @@ def create_learning_page(notebook):
 def create_line_graph(numbers, ax=None, canvas=None):
     if ax is None:
         fig, ax = plt.subplots()
-        ax.set_xlabel('Index')
-        ax.set_ylabel('Values')
-        ax.set_title('Input Numbers')
+
+    ax.clear()  # Clear the previous plot
 
     ax.plot(range(len(numbers)), numbers, marker='o')
 
-    if canvas: 
+    # Set x-axis locator to integer values
+    ax.locator_params(axis='x', integer=True)
+    ax.locator_params(axis='y', integer=True)
+
+    # Set or update labels and title
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Values')
+    ax.set_title('Input Numbers')
+
+    if canvas:
         canvas.get_tk_widget().destroy()
 
-    canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
-    canvas_widget = canvas.get_tk_widget()
-    canvas_widget.pack()
+    create_line_graph.ax = ax
+    create_line_graph.canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
+    create_line_graph.canvas_widget = create_line_graph.canvas.get_tk_widget()
+    create_line_graph.canvas_widget.pack()
 
 def get_numbers():
     input_values = entry.get()
