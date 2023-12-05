@@ -149,6 +149,9 @@ class Bloom_Filter:
     return True
 
 class doc_graph:
+  def get_edge_table(self):
+    return self.edge_table
+  
   def __init__(self,h=5,gen_mode='max'):
     #Initiate graph, assigning generate mode
     self.h = h #Currently serves no purpose but can be adapted to serve as an h_max, the maximum h allowed during generation
@@ -309,8 +312,6 @@ class doc_graph:
         edge = random.choices(edges,probs)
         prompt.append(edge[0][1])
       
-        
-
       return prompt
 
   def check_seq(self,seq):
