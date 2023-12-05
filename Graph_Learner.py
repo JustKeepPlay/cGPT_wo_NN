@@ -176,6 +176,7 @@ class doc_graph:
       if i%12500 == 0:
         print(str(100.0*(i+1)/ldoc)+'% Complete.')
         print(str(i) + ' of ' + str(ldoc))
+        print('gen_mode = ', self.gen_mode)
       #Iterate through the document looking at each word w
       key = (w,doc[i+1])
       #Create a key for edge (W(n),W(n+1))
@@ -185,6 +186,7 @@ class doc_graph:
       else:
         #otherwise create a new edge set
         self.node_to_edge_table[w] = (key,)
+
       if key in self.edge_table:
         #if edge has been seen before load its hash set Pi and bloom filter
         hashes = set(self.edge_table[key])
@@ -280,8 +282,9 @@ class doc_graph:
       if self.gen_mode == 'max':
         #Select the edge in edges with the max Pi
         emax = 0
-        edge = (None,None)
+        edge = (None, None)
         for e in edges:
+          print(e, "\n")
           x = len(self.edge_table[e])
           if x > emax:
             emax = x
@@ -326,6 +329,7 @@ class doc_graph:
       if bfilter.check(seq):
         fedges.append(e)
     return fedges
+    
 
 def pickle_graph(g,filename='default'):
     #Save graph g as a python pickle type
