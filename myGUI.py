@@ -29,6 +29,7 @@ def create_learning_page(notebook):
     input_label.pack()
 
     entry = tk.Entry(learning_page)
+    # entry.insert(0, "1,2,3")
     entry.pack()
 
     calculate_button = tk.Button(learning_page, text="Train", command=get_numbers)
@@ -96,9 +97,18 @@ def create_prediction_page(notebook):
   
 
 def create_evaluation_page(notebook):
-    global evaluation_page
+    global evaluation_page, eva_node_entry, eva_friends_entry
     evaluation_page = tk.Frame(notebook)
     notebook.add(evaluation_page, text="Evaluation Phase")
+
+    eva_node_label = tk.Label(evaluation_page, text="Node: ")
+    eva_node_label.pack()
+    eva_node_entry = tk.Entry(evaluation_page)
+    eva_node_entry.pack()
+    # eva_friends_label = tk.Label(evaluation_page, text="Neighbour: ")
+    # eva_friends_label.pack()
+    # eva_friends_entry = tk.Entry(evaluation_page)
+    # eva_friends_entry.pack()
 
     # Create a button to trigger the Evaluation on the evaluation page
     evaluation_button = tk.Button(evaluation_page, text="Evaluate", command=create_network)
@@ -108,10 +118,22 @@ def create_evaluation_page(notebook):
     create_evaluation_page.canvas = None
     create_evaluation_page.toolbar = None
 
+# def get_node_edges(graph, node):
+#     if graph.has_node(node):
+#         edges = list(graph.edges(node))
+#         return edges
+#     else:
+#         return None
+
 
 def create_network():
+    specified_node = eva_node_entry.get()
     G = nx.DiGraph()
     G.add_edges_from(doc.get_edge_table())
+
+    # Create a new Matplotlib figure for the network graph
+    fig, ax = plt.subplots()
+    ax.set_title('Network Graph')
 
     # Clear the previous network graph (if any)
     if create_evaluation_page.canvas:
@@ -119,19 +141,41 @@ def create_network():
     if create_evaluation_page.toolbar:
         create_evaluation_page.toolbar.destroy()
 
-    # Create a new Matplotlib figure for the network graph
-    fig, ax = plt.subplots()
-    ax.set_title('Network Graph')
 
-    pos = nx.kamada_kawai_layout(G)
+    try:
+        if len(eva_node_entry.get()) == 0:
+            pos = nx.kamada_kawai_layout(G)
+            # Draw the network graph
+            nx.draw(
+                G,
+                pos,
+                with_labels=True,
+                node_color='lightgreen'
+            )
+        else:
+            specified_node = int(specified_node)
+            if G.has_node(specified_node):
+                pos = nx.spring_layout(G)
+                # node_edges = get_node_edges(G, specified_node)
+                # print(f"Edges connected to Node {specified_node}: {node_edges}")
 
-    # Draw the network graph
-    nx.draw(
-        G,
-        pos,
-        with_labels=True,
-        node_color='lightgreen'
-    )
+                # # Create a subgraph with the specified edges
+                # subgraph_edges = [(specified_node, neighbor) for neighbor in G.neighbors(specified_node)]
+                # subgraph = G.subgraph(subgraph_edges)
+                subgraph = nx.ego_graph(G, specified_node)
+
+                # Draw the network graph
+                nx.draw(
+                    subgraph,
+                    pos,
+                    with_labels=True,
+                    node_color='lightgreen'
+                )
+            else:
+                ax.set_title('No node specified.')
+            
+    except:
+        print("An exception error")
 
     # Embed the Matplotlib network graph in the Tkinter window
     canvas = FigureCanvasTkAgg(fig, master=evaluation_page)
@@ -145,12 +189,14 @@ def create_network():
     toolbar.update()
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
+    
+
 # ------------------------------------------------------------------------------------------------------------
 
 
 def main():
     window = tk.Tk()
-    window.geometry('800x600')
+    window.geometry('800x700')
     window.title("Graph Learning GUI ")
 
     notebook = ttk.Notebook(window)
