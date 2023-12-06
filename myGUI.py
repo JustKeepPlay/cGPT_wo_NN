@@ -67,7 +67,7 @@ def create_line_graph(numbers, ax=None, canvas=None):
 
 def get_numbers():
     input_values = entry.get()
-    numbers = [int(num) for num in input_values.split(',')[:-1]]
+    numbers = [int(num) for num in input_values.split(',')]
     train(numbers, 5)
     # output = doc.gen_next(numbers, 5)
     result_label.config(text=f"Result: { numbers }")
@@ -104,15 +104,20 @@ def create_evaluation_page(notebook):
     evaluation_button = tk.Button(evaluation_page, text="Evaluate", command=create_network)
     evaluation_button.pack()
 
+    # Initialize canvas variable
+    create_evaluation_page.canvas = None
+    create_evaluation_page.toolbar = None
+
 
 def create_network():
     G = nx.DiGraph()
-    print(doc.get_edge_table())
     G.add_edges_from(doc.get_edge_table())
 
     # Clear the previous network graph (if any)
-    if hasattr(create_network, 'canvas'):
-        create_network.canvas.get_tk_widget().destroy()
+    if create_evaluation_page.canvas:
+        create_evaluation_page.canvas.get_tk_widget().destroy()
+    if create_evaluation_page.toolbar:
+        create_evaluation_page.toolbar.destroy()
 
     # Create a new Matplotlib figure for the network graph
     fig, ax = plt.subplots()
@@ -130,11 +135,13 @@ def create_network():
 
     # Embed the Matplotlib network graph in the Tkinter window
     canvas = FigureCanvasTkAgg(fig, master=evaluation_page)
+    create_evaluation_page.canvas = canvas  # Store canvas for future destruction
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.pack()
 
     # Add the Matplotlib NavigationToolbar2Tk
     toolbar = NavigationToolbar2Tk(canvas, evaluation_page)
+    create_evaluation_page.toolbar = toolbar  # Store toolbar for future destruction
     toolbar.update()
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
