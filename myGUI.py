@@ -14,13 +14,13 @@ def create_learning_page(notebook):
     global learning_page, entry, create_line_graph, result_label
     learning_page = tk.Frame(notebook)
     notebook.add(learning_page, text="Learning Phase")
-    def fibo (n):
-        if n <=1:
-            return n
-        else:
-            return fibo(n-1)+fibo(n-2)
-    fiboNum = [fibo(i) for i in range(30)]
-    doc.add_doc(fiboNum)    
+    # def fibo (n):
+    #     if n <=1:
+    #         return n
+    #     else:
+    #         return fibo(n-1)+fibo(n-2)
+    # fiboNum = [fibo(i) for i in range(30)]
+    # doc.add_doc(fiboNum)    
 
     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
     upload_button.pack()
@@ -43,24 +43,34 @@ def create_learning_page(notebook):
 def create_line_graph(numbers, ax=None, canvas=None):
     if ax is None:
         fig, ax = plt.subplots()
-        ax.set_xlabel('Index')
-        ax.set_ylabel('Values')
-        ax.set_title('Input Numbers')
+
+    ax.clear()  # Clear the previous plot
 
     ax.plot(range(len(numbers)), numbers, marker='o')
 
-    if canvas: 
+    # Set x-axis locator to integer values
+    ax.locator_params(axis='x', integer=True)
+    ax.locator_params(axis='y', integer=True)
+
+    # Set or update labels and title
+    ax.set_xlabel('Index')
+    ax.set_ylabel('Values')
+    ax.set_title('Input Numbers')
+
+    if canvas:
         canvas.get_tk_widget().destroy()
 
-    canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
-    canvas_widget = canvas.get_tk_widget()
-    canvas_widget.pack()
+    create_line_graph.ax = ax
+    create_line_graph.canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
+    create_line_graph.canvas_widget = create_line_graph.canvas.get_tk_widget()
+    create_line_graph.canvas_widget.pack()
 
 def get_numbers():
     input_values = entry.get()
-    numbers = [int(num) for num in input_values.split(',')]
-    output = doc.gen_next(numbers, 5)
-    result_label.config(text=f"Result: {output}")
+    numbers = [int(num) for num in input_values.split(',')[:-1]]
+    train(numbers, 5)
+    # output = doc.gen_next(numbers, 5)
+    result_label.config(text=f"Result: { numbers }")
     create_line_graph(numbers, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
 
 def upload_file():
@@ -70,6 +80,10 @@ def upload_file():
             content = file.read()
             entry.delete(0, tk.END)
             entry.insert(0, content)
+
+def train(seq, h):
+    doc.add_doc(seq,h)  
+
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -93,6 +107,7 @@ def create_evaluation_page(notebook):
 
 def create_network():
     G = nx.DiGraph()
+    print(doc.get_edge_table())
     G.add_edges_from(doc.get_edge_table())
 
     # Clear the previous network graph (if any)
