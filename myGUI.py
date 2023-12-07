@@ -13,14 +13,7 @@ doc = doc_graph(5, 'wrand')
 def create_learning_page(notebook):
     global learning_page, entry, create_line_graph, result_label
     learning_page = tk.Frame(notebook)
-    notebook.add(learning_page, text="Learning Phase")
-    # def fibo (n):
-    #     if n <=1:
-    #         return n
-    #     else:
-    #         return fibo(n-1)+fibo(n-2)
-    # fiboNum = [fibo(i) for i in range(30)]
-    # doc.add_doc(fiboNum)    
+    notebook.add(learning_page, text="Learning Phase")    
 
     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
     upload_button.pack()
@@ -112,29 +105,36 @@ def get_pred_num():
     #output = doc.gen_next(numbers, 5)
     gen_num = nums.copy()
     pred_num = []
+    preed_num = []
     pred_num.append(doc.gen_next(gen_num,5))
+    preed_num.append(doc.gen_next(*pred_num,5))
     print('nums :',nums)
     print('gen nums :',gen_num)
-    create_pred_graph(nums.copy(), pred_num , ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
+    create_pred_graph(nums.copy(), pred_num.copy() , ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
     
 
-def create_pred_graph(numbers, predicted_number, ax=None, canvas=None):
+def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
     if ax is None:
         fig, ax = plt.subplots()
     
     ax.clear()  # Clear the previous plot
      # Plot the input numbers in blue
-    print(numbers)
+    print('number :',numbers)
+    print('Pred :',Pred_num)
 
     ax.plot(range(len(numbers)), numbers, marker='o', color='blue', label='Input Numbers')
     
     # Plot only the last element of the predicted number in red
-    ax.plot(len(numbers) , predicted_number[0][-1], marker='o', color='red', label='Predicted Number')
+    ax.plot(len(numbers)+1 , Pred_num[0][-1], marker='o', color='red', label='1st Predicted Number')
+
+    ax.plot(len(numbers) , Pred_num[0][-2], marker='o', color='red', label='2nd Predicted Number')
+
 
     for x, y in zip(range(len(numbers)),numbers):
         plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')
     
-    plt.text(len(numbers), predicted_number[0][-1], f'{predicted_number[0][-1]}', ha='left', va='bottom', c='red')
+    plt.text(len(numbers)+1, Pred_num[0][-1], f'{Pred_num[0][-1]}', ha='left', va='bottom', c='red')
+    plt.text(len(numbers), Pred_num[0][-2], f'{Pred_num[0][-2]}', ha='left', va='bottom', c='red')
 
     # Set x-axis locator to integer values
     ax.locator_params(axis='y', integer=True)
