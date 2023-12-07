@@ -117,18 +117,20 @@ def get_pred_num():
 def create_pred_graph(numbers, predicted_number, ax=None, canvas=None):
     if ax is None:
         fig, ax = plt.subplots()
-    print(predicted_number)
+    
     ax.clear()  # Clear the previous plot
      # Plot the input numbers in blue
+    print(predicted_number)
+
     ax.plot(range(len(numbers)-1), numbers[:-1], marker='o', color='blue', label='Input Numbers')
     
     # Plot only the last element of the predicted number in red
     ax.plot(len(numbers)-1 , predicted_number[0][-1], marker='o', color='red', label='Predicted Number')
 
     for x, y in zip(range(len(numbers)-1),numbers[:-1]):
-        plt.text(x, y, f'{y}', ha='right', va='bottom')
+        plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')
     
-    plt.text(len(numbers)-1, predicted_number[0][-1], f'{predicted_number[0][-1]}', ha='right', va='bottom')
+    plt.text(len(numbers)-1, predicted_number[0][-1], f'{predicted_number[0][-1]}', ha='left', va='bottom', c='red')
 
     # Set x-axis locator to integer values
     ax.locator_params(axis='y', integer=True)
