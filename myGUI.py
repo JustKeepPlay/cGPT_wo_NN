@@ -13,14 +13,7 @@ doc = doc_graph(5, 'wrand')
 def create_learning_page(notebook):
     global learning_page, entry, create_line_graph, result_label
     learning_page = tk.Frame(notebook)
-    notebook.add(learning_page, text="Learning Phase")
-    # def fibo (n):
-    #     if n <=1:
-    #         return n
-    #     else:
-    #         return fibo(n-1)+fibo(n-2)
-    # fiboNum = [fibo(i) for i in range(30)]
-    # doc.add_doc(fiboNum)    
+    notebook.add(learning_page, text="Learning Phase")    
 
     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
     upload_button.pack()
@@ -29,6 +22,7 @@ def create_learning_page(notebook):
     input_label.pack()
 
     entry = tk.Entry(learning_page)
+    # entry.insert(0, "1,2,3")
     entry.pack()
 
     calculate_button = tk.Button(learning_page, text="Train", command=get_numbers)
@@ -88,17 +82,90 @@ def train(seq, h):
 # ------------------------------------------------------------------------------------------------------------
 
 def create_prediction_page(notebook):
+    global predict_page , pred_button , create_pred_graph, Pentry
     predict_page = tk.Frame(notebook)
     notebook.add(predict_page, text="Predict Phase")
-    # Add widgets and functionality for the prediction page as needed  
+
+    pred_input_label = tk.Label(predict_page, text="Enter the sequence:")
+    pred_input_label.pack()
+
+    Pentry = tk.Entry(predict_page)
+    Pentry.pack()
+
+    pred_button = tk.Button(predict_page, text="Predict", command=get_pred_num)
+    pred_button.pack()
+
+    create_pred_graph.ax = None
+    create_pred_graph.canvas = None
+
+def get_pred_num():
+    pred_input = Pentry.get()
+    nums = [int(num) for num in pred_input.split(',')]
+    #print(nums)
+    #output = doc.gen_next(numbers, 5)
+    gen_num = nums.copy()
+    pred_num = []
+    pred_num.append(doc.gen_next(gen_num,5))
+    print('nums :',nums)
+    print('gen nums :',gen_num)
+    create_pred_graph(nums.copy(), pred_num , ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
+    
+
+def create_pred_graph(numbers, predicted_number, ax=None, canvas=None):
+    if ax is None:
+        fig, ax = plt.subplots()
+    
+    ax.clear()  # Clear the previous plot
+     # Plot the input numbers in blue
+    print(numbers)
+
+    ax.plot(range(len(numbers)), numbers, marker='o', color='blue', label='Input Numbers')
+    
+    # Plot only the last element of the predicted number in red
+    ax.plot(len(numbers) , predicted_number[0][-1], marker='o', color='red', label='Predicted Number')
+
+    for x, y in zip(range(len(numbers)),numbers):
+        plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')
+    
+    plt.text(len(numbers), predicted_number[0][-1], f'{predicted_number[0][-1]}', ha='left', va='bottom', c='red')
+
+    # Set x-axis locator to integer values
+    ax.locator_params(axis='y', integer=True)
+    ax.locator_params(axis='x', integer=True)
+
+    # Set or update labels and title
+    ax.set_xlabel('Step')
+    ax.set_ylabel('Value')
+    ax.set_title('Magic of prediction')
+    
+    # Show legend
+    ax.legend()
+
+    if canvas:
+        canvas.get_tk_widget().destroy()
+
+    create_pred_graph.ax = ax
+    create_pred_graph.canvas = FigureCanvasTkAgg(ax.figure, master=predict_page)
+    create_pred_graph.canvas_widget = create_pred_graph.canvas.get_tk_widget()
+    create_pred_graph.canvas_widget.pack()
+
 
 # ------------------------------------------------------------------------------------------------------------
   
 
 def create_evaluation_page(notebook):
-    global evaluation_page
+    global evaluation_page, eva_node_entry, eva_friends_entry
     evaluation_page = tk.Frame(notebook)
     notebook.add(evaluation_page, text="Evaluation Phase")
+
+    eva_node_label = tk.Label(evaluation_page, text="Node: ")
+    eva_node_label.pack()
+    eva_node_entry = tk.Entry(evaluation_page)
+    eva_node_entry.pack()
+    # eva_friends_label = tk.Label(evaluation_page, text="Neighbour: ")
+    # eva_friends_label.pack()
+    # eva_friends_entry = tk.Entry(evaluation_page)
+    # eva_friends_entry.pack()
 
     # Create a button to trigger the Evaluation on the evaluation page
     evaluation_button = tk.Button(evaluation_page, text="Evaluate", command=create_network)
@@ -108,10 +175,22 @@ def create_evaluation_page(notebook):
     create_evaluation_page.canvas = None
     create_evaluation_page.toolbar = None
 
+# def get_node_edges(graph, node):
+#     if graph.has_node(node):
+#         edges = list(graph.edges(node))
+#         return edges
+#     else:
+#         return None
+
 
 def create_network():
+    specified_node = eva_node_entry.get()
     G = nx.DiGraph()
     G.add_edges_from(doc.get_edge_table())
+
+    # Create a new Matplotlib figure for the network graph
+    fig, ax = plt.subplots()
+    ax.set_title('Network Graph')
 
     # Clear the previous network graph (if any)
     if create_evaluation_page.canvas:
@@ -119,19 +198,41 @@ def create_network():
     if create_evaluation_page.toolbar:
         create_evaluation_page.toolbar.destroy()
 
-    # Create a new Matplotlib figure for the network graph
-    fig, ax = plt.subplots()
-    ax.set_title('Network Graph')
 
-    pos = nx.kamada_kawai_layout(G)
+    try:
+        if len(eva_node_entry.get()) == 0:
+            pos = nx.kamada_kawai_layout(G)
+            # Draw the network graph
+            nx.draw(
+                G,
+                pos,
+                with_labels=True,
+                node_color='lightgreen'
+            )
+        else:
+            specified_node = int(specified_node)
+            if G.has_node(specified_node):
+                pos = nx.spring_layout(G)
+                # node_edges = get_node_edges(G, specified_node)
+                # print(f"Edges connected to Node {specified_node}: {node_edges}")
 
-    # Draw the network graph
-    nx.draw(
-        G,
-        pos,
-        with_labels=True,
-        node_color='lightgreen'
-    )
+                # # Create a subgraph with the specified edges
+                # subgraph_edges = [(specified_node, neighbor) for neighbor in G.neighbors(specified_node)]
+                # subgraph = G.subgraph(subgraph_edges)
+                subgraph = nx.ego_graph(G, specified_node)
+
+                # Draw the network graph
+                nx.draw(
+                    subgraph,
+                    pos,
+                    with_labels=True,
+                    node_color='lightgreen'
+                )
+            else:
+                ax.set_title('No node specified.')
+            
+    except:
+        print("An exception error")
 
     # Embed the Matplotlib network graph in the Tkinter window
     canvas = FigureCanvasTkAgg(fig, master=evaluation_page)
@@ -145,12 +246,14 @@ def create_network():
     toolbar.update()
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
+    
+
 # ------------------------------------------------------------------------------------------------------------
 
 
 def main():
     window = tk.Tk()
-    window.geometry('800x600')
+    window.geometry('800x700')
     window.title("Graph Learning GUI ")
 
     notebook = ttk.Notebook(window)
