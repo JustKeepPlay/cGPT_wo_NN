@@ -106,9 +106,6 @@ def get_pred_num():
     pred_num = []
     pred_num = doc.gen_next(doc.gen_next(nums.copy(),5))
 
-    create_pred_graph(nums.copy(), pred_num , ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
-    
-
 def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
     if ax is None:
         fig, ax = plt.subplots()
@@ -119,22 +116,18 @@ def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
     print('Pred :',Pred_num)
 
     ax.plot(range(len(numbers)+2), Pred_num, linestyle=':', color='red')
-
     ax.plot(range(len(numbers)), numbers, marker='o', color='blue', label='Input Numbers')
     
     # Plot only the last element of the predicted number in red
     ax.plot(len(numbers)+1 , Pred_num[-1], marker='o', color='red', label='1st Predicted Number')
 
     ax.plot(len(numbers) , Pred_num[-2], marker='o', color='red', label='2nd Predicted Number')
-    
 
     for x, y in zip(range(len(numbers)),numbers):
         plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')
     
     plt.text(len(numbers)+1, Pred_num[-1], f'{Pred_num[-1]}', ha='left', va='bottom', c='red')
     plt.text(len(numbers), Pred_num[-2], f'{Pred_num[-2]}', ha='left', va='bottom', c='red')
-
-
 
     # Set x-axis locator to integer values
     ax.locator_params(axis='y', integer=True)
