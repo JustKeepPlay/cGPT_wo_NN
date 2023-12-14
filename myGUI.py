@@ -10,13 +10,6 @@ doc = doc_graph(5, 'wrand')
 
 # ------------------------------------------------------------------------------------------------------------
 
-def reset_training():
-    doc.__init__(5, 'wrand')
-    entry.delete(0, tk.END)
-    result_label.config(text="--- Trained data reset ---")
-    create_line_graph(None, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
-    
-
 def create_learning_page(notebook):
     global learning_page, entry, create_line_graph, result_label
     learning_page = tk.Frame(notebook)
@@ -35,9 +28,6 @@ def create_learning_page(notebook):
     calculate_button = tk.Button(learning_page, text="Train", command=get_numbers)
     calculate_button.pack()
 
-    reset_training_button = tk.Button(learning_page, text="Reset Traing Data", command=reset_training)
-    reset_training_button.pack()
-
     result_label = tk.Label(learning_page, text="Result: ")
     result_label.pack()
 
@@ -49,8 +39,6 @@ def create_line_graph(numbers, ax=None, canvas=None):
         fig, ax = plt.subplots()
 
     ax.clear()  # Clear the previous plot
-    if canvas:
-        canvas.get_tk_widget().destroy()
 
     ax.plot(range(len(numbers)), numbers, marker='o')
 
@@ -62,6 +50,9 @@ def create_line_graph(numbers, ax=None, canvas=None):
     ax.set_xlabel('Index')
     ax.set_ylabel('Values')
     ax.set_title('Input Numbers')
+
+    if canvas:
+        canvas.get_tk_widget().destroy()
 
     create_line_graph.ax = ax
     create_line_graph.canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
@@ -112,31 +103,38 @@ def get_pred_num():
     nums = [int(num) for num in pred_input.split(',')]
     #print(nums)
     #output = doc.gen_next(numbers, 5)
-    gen_num = nums.copy()
     pred_num = []
-    pred_num.append(doc.gen_next(gen_num,5))
-    print('nums :',nums)
-    print('gen nums :',gen_num)
+    pred_num = doc.gen_next(doc.gen_next(nums.copy(),5))
+
     create_pred_graph(nums.copy(), pred_num , ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
     
 
-def create_pred_graph(numbers, predicted_number, ax=None, canvas=None):
+def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
     if ax is None:
         fig, ax = plt.subplots()
     
     ax.clear()  # Clear the previous plot
      # Plot the input numbers in blue
-    print(numbers)
+    print('number :',numbers)
+    print('Pred :',Pred_num)
+
+    ax.plot(range(len(numbers)+2), Pred_num, linestyle=':', color='red')
 
     ax.plot(range(len(numbers)), numbers, marker='o', color='blue', label='Input Numbers')
     
     # Plot only the last element of the predicted number in red
-    ax.plot(len(numbers) , predicted_number[0][-1], marker='o', color='red', label='Predicted Number')
+    ax.plot(len(numbers)+1 , Pred_num[-1], marker='o', color='red', label='1st Predicted Number')
+
+    ax.plot(len(numbers) , Pred_num[-2], marker='o', color='red', label='2nd Predicted Number')
+    
 
     for x, y in zip(range(len(numbers)),numbers):
         plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')
     
-    plt.text(len(numbers), predicted_number[0][-1], f'{predicted_number[0][-1]}', ha='left', va='bottom', c='red')
+    plt.text(len(numbers)+1, Pred_num[-1], f'{Pred_num[-1]}', ha='left', va='bottom', c='red')
+    plt.text(len(numbers), Pred_num[-2], f'{Pred_num[-2]}', ha='left', va='bottom', c='red')
+
+
 
     # Set x-axis locator to integer values
     ax.locator_params(axis='y', integer=True)
@@ -145,7 +143,7 @@ def create_pred_graph(numbers, predicted_number, ax=None, canvas=None):
     # Set or update labels and title
     ax.set_xlabel('Step')
     ax.set_ylabel('Value')
-    ax.set_title('Magic of prediction')
+    ax.set_title('Prediction Graph')
     
     # Show legend
     ax.legend()
@@ -184,29 +182,18 @@ def create_evaluation_page(notebook):
     create_evaluation_page.canvas = None
     create_evaluation_page.toolbar = None
 
-# def get_all_edges_frequency():
-#     # Get the degree of each node
-#     degrees = dict(G.degree())
-
-#     # Count the frequency of each degree
-#     degree_freq = {}
-#     for degree in degrees.values():
-#         if degree in degree_freq:
-#             degree_freq[degree] += 1
-#         else:
-#             degree_freq[degree] = 1
-
-#     # Print the frequency of edges based on the degree of their nodes
-#     for edge in G.edges():
-#         edge_degree_freq = degree_freq[degrees[edge[0]]] + degree_freq[degrees[edge[1]]]
-#         print(f"Edge {edge} has a frequency of {edge_degree_freq}")
+# def get_node_edges(graph, node):
+#     if graph.has_node(node):
+#         edges = list(graph.edges(node))
+#         return edges
+#     else:
+#         return None
 
 
 def create_network():
     specified_node = eva_node_entry.get()
     G = nx.DiGraph()
     G.add_edges_from(doc.get_edge_table())
-    print("Edge Table: ", doc.get_edge_table())
 
     # Create a new Matplotlib figure for the network graph
     fig, ax = plt.subplots()
@@ -218,12 +205,10 @@ def create_network():
     if create_evaluation_page.toolbar:
         create_evaluation_page.toolbar.destroy()
 
-    # fig, axe = plt.subplots(figsize=(12,7))
 
     try:
         if len(eva_node_entry.get()) == 0:
             pos = nx.kamada_kawai_layout(G)
-            ax.set_title(G.edges, loc='right')
             # Draw the network graph
             nx.draw(
                 G,
@@ -235,8 +220,13 @@ def create_network():
             specified_node = int(specified_node)
             if G.has_node(specified_node):
                 pos = nx.spring_layout(G)
+                # node_edges = get_node_edges(G, specified_node)
+                # print(f"Edges connected to Node {specified_node}: {node_edges}")
+
+                # # Create a subgraph with the specified edges
+                # subgraph_edges = [(specified_node, neighbor) for neighbor in G.neighbors(specified_node)]
+                # subgraph = G.subgraph(subgraph_edges)
                 subgraph = nx.ego_graph(G, specified_node)
-                ax.set_title(subgraph.edges, loc='right')
 
                 # Draw the network graph
                 nx.draw(
@@ -261,14 +251,16 @@ def create_network():
     toolbar = NavigationToolbar2Tk(canvas, evaluation_page)
     create_evaluation_page.toolbar = toolbar  # Store toolbar for future destruction
     toolbar.update()
-    # Rearrange the packing order for the canvas and toolbar
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-    toolbar.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    
+
 # ------------------------------------------------------------------------------------------------------------
+
 
 def main():
     window = tk.Tk()
-    window.geometry('800x650')
+    window.geometry('800x700')
     window.title("Graph Learning GUI ")
 
     notebook = ttk.Notebook(window)
