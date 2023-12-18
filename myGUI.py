@@ -127,7 +127,7 @@ def create_pred_graph(numbers, Pred_num, ele, ax, canvas):
     print('Pred :',Pred_num)
     print('extended :',exd_num)
 
-    #if ax is None:
+    # if ax is None:
     fig, ax = plt.subplots()
     
     ax.clear()  # Clear the previous plot
