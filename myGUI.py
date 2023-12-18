@@ -110,8 +110,8 @@ def get_pred_num():
     
 
 def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
-    if ax is None:
-        fig, ax = plt.subplots()
+    # if ax is None:
+    fig, ax = plt.subplots()
     
     ax.clear()  # Clear the previous plot
      # Plot the input numbers in blue
