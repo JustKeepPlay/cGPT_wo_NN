@@ -82,7 +82,7 @@ def train(seq, h):
 # ------------------------------------------------------------------------------------------------------------
 
 def create_prediction_page(notebook):
-    global predict_page , pred_button , create_pred_graph, Pentry
+    global predict_page , pred_button , create_pred_graph, Pentry, Eentry
     predict_page = tk.Frame(notebook)
     notebook.add(predict_page, text="Predict Phase")
 
@@ -92,6 +92,12 @@ def create_prediction_page(notebook):
     Pentry = tk.Entry(predict_page)
     Pentry.pack()
 
+    element_label = tk.Label(predict_page, text="How many to predict:")
+    element_label.pack()
+
+    Eentry = tk.Entry(predict_page, width=10)
+    Eentry.pack()
+
     pred_button = tk.Button(predict_page, text="Predict", command=get_pred_num)
     pred_button.pack()
 
@@ -100,41 +106,46 @@ def create_prediction_page(notebook):
 
 def get_pred_num():
     pred_input = Pentry.get()
+    element = Eentry.get()
     nums = [int(num) for num in pred_input.split(',')]
-    #print(nums)
-    #output = doc.gen_next(numbers, 5)
+    num = nums.copy()
+    ele = int(element)
+    
     pred_num = []
-    pred_num = doc.gen_next(doc.gen_next(nums.copy(),5))
 
-    create_pred_graph(nums.copy(), pred_num , ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
+    for i in range(ele):
+        pred_num = doc.gen_next(nums,5)
+
+    print(pred_num)
+
+    create_pred_graph(num, pred_num ,ele, ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
     
 
-def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
-    if ax is None:
-        fig, ax = plt.subplots()
-    
-    ax.clear()  # Clear the previous plot
-     # Plot the input numbers in blue
+def create_pred_graph(numbers, Pred_num, ele, ax, canvas):
+    exd_num = Pred_num[len(Pred_num)-ele:]
     print('number :',numbers)
     print('Pred :',Pred_num)
+    print('extended :',exd_num)
 
-    ax.plot(range(len(numbers)+2), Pred_num, linestyle=':', color='red')
+    #if ax is None:
+    fig, ax = plt.subplots()
+    
+    ax.clear()  # Clear the previous plot
 
-    ax.plot(range(len(numbers)), numbers, marker='o', color='blue', label='Input Numbers')
+     # Plot the input numbers in blue
+    ax.plot(range(len(Pred_num)), Pred_num, linestyle=':', color='red')
+
+    ax.plot(range(len(numbers)), numbers, marker='o', color='blue')
     
     # Plot only the last element of the predicted number in red
-    ax.plot(len(numbers)+1 , Pred_num[-1], marker='o', color='red', label='1st Predicted Number')
-
-    ax.plot(len(numbers) , Pred_num[-2], marker='o', color='red', label='2nd Predicted Number')
     
+    for i in range(ele):
+        ax.plot(len(numbers)+i , exd_num[i], marker='o', color='red')
+        plt.text(len(numbers)+i, exd_num[i], f'{exd_num[i]}', ha='right', va='bottom', c='red')
+        print('x=',len(numbers)+i,' y=',exd_num[i])
 
     for x, y in zip(range(len(numbers)),numbers):
-        plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')
-    
-    plt.text(len(numbers)+1, Pred_num[-1], f'{Pred_num[-1]}', ha='left', va='bottom', c='red')
-    plt.text(len(numbers), Pred_num[-2], f'{Pred_num[-2]}', ha='left', va='bottom', c='red')
-
-
+        plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')  
 
     # Set x-axis locator to integer values
     ax.locator_params(axis='y', integer=True)
@@ -146,7 +157,7 @@ def create_pred_graph(numbers, Pred_num, ax=None, canvas=None):
     ax.set_title('Prediction Graph')
     
     # Show legend
-    ax.legend()
+    #ax.legend()
 
     if canvas:
         canvas.get_tk_widget().destroy()
@@ -169,10 +180,7 @@ def create_evaluation_page(notebook):
     eva_node_label.pack()
     eva_node_entry = tk.Entry(evaluation_page)
     eva_node_entry.pack()
-    # eva_friends_label = tk.Label(evaluation_page, text="Neighbour: ")
-    # eva_friends_label.pack()
-    # eva_friends_entry = tk.Entry(evaluation_page)
-    # eva_friends_entry.pack()
+    
 
     # Create a button to trigger the Evaluation on the evaluation page
     evaluation_button = tk.Button(evaluation_page, text="Evaluate", command=create_network)
