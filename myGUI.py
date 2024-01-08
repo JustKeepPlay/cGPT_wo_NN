@@ -1,82 +1,87 @@
 import tkinter as tk
 from tkinter import ttk
+import customtkinter
 from tkinter import filedialog
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from Graph_Learner import doc_graph
 import networkx as nx
+import ast
+
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 doc = doc_graph(5, 'wrand')
 
 # ------------------------------------------------------------------------------------------------------------
 
-def create_learning_page(notebook):
-    global learning_page, entry, create_line_graph, result_label
-    learning_page = tk.Frame(notebook)
-    notebook.add(learning_page, text="Learning Phase")    
+# def create_learning_page(notebook):
+#     global learning_page, entry, create_line_graph, result_label
+#     learning_page = tk.Frame(notebook)
+#     notebook.add(learning_page, text="Learning Phase")    
 
-    upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
-    upload_button.pack()
+#     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
+#     upload_button.pack()
 
-    input_label = tk.Label(learning_page, text="Enter numbers (separated by space) or upload a file:")
-    input_label.pack()
+#     input_label = tk.Label(learning_page, text="Enter numbers (separated by comma) or upload a file:")
+#     input_label.pack()
 
-    entry = tk.Entry(learning_page)
-    # entry.insert(0, "1,2,3")
-    entry.pack()
+#     entry = tk.Entry(learning_page)
+#     # entry.insert(0, "1,2,3")
+#     entry.pack()
 
-    calculate_button = tk.Button(learning_page, text="Train", command=get_numbers)
-    calculate_button.pack()
+#     calculate_button = tk.Button(learning_page, text="Train", command=get_numbers)
+#     calculate_button.pack()
 
-    result_label = tk.Label(learning_page, text="Result: ")
-    result_label.pack()
+#     result_label = tk.Label(learning_page, text="Result: ")
+#     result_label.pack()
 
-    create_line_graph.ax = None
-    create_line_graph.canvas = None
+#     create_line_graph.ax = None
+#     create_line_graph.canvas = None
 
-def create_line_graph(numbers, ax=None, canvas=None):
-    if ax is None:
-        fig, ax = plt.subplots()
+# def create_line_graph(numbers, ax=None, canvas=None):
+#     if ax is None:
+#         fig, ax = plt.subplots()
 
-    ax.clear()  # Clear the previous plot
+#     ax.clear()  # Clear the previous plot
 
-    ax.plot(range(len(numbers)), numbers, marker='o')
+#     ax.plot(range(len(numbers)), numbers, marker='o')
 
-    # Set x-axis locator to integer values
-    ax.locator_params(axis='x', integer=True)
-    ax.locator_params(axis='y', integer=True)
+#     # Set x-axis locator to integer values
+#     ax.locator_params(axis='x', integer=True)
+#     ax.locator_params(axis='y', integer=True)
 
-    # Set or update labels and title
-    ax.set_xlabel('Index')
-    ax.set_ylabel('Values')
-    ax.set_title('Input Numbers')
+#     # Set or update labels and title
+#     ax.set_xlabel('Index')
+#     ax.set_ylabel('Values')
+#     ax.set_title('Input Numbers')
 
-    if canvas:
-        canvas.get_tk_widget().destroy()
+#     if canvas:
+#         canvas.get_tk_widget().destroy()
 
-    create_line_graph.ax = ax
-    create_line_graph.canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
-    create_line_graph.canvas_widget = create_line_graph.canvas.get_tk_widget()
-    create_line_graph.canvas_widget.pack()
+#     create_line_graph.ax = ax
+#     create_line_graph.canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
+#     create_line_graph.canvas_widget = create_line_graph.canvas.get_tk_widget()
+#     create_line_graph.canvas_widget.pack()
 
-def get_numbers():
-    input_values = entry.get()
-    numbers = [int(num) for num in input_values.split(',')]
-    train(numbers, 5)
-    # output = doc.gen_next(numbers, 5)
-    result_label.config(text=f"Result: { numbers }")
-    create_line_graph(numbers, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
+# def get_numbers():
+#     input_values = entry.get()
+#     numbers = [int(num) for num in input_values.split(',')]
+#     train(numbers, 5)
+#     # output = doc.gen_next(numbers, 5)
+#     result_label.config(text=f"Result: { numbers }")
+#     create_line_graph(numbers, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
 
-def upload_file():
-    file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    if file_path:
-        with open(file_path, 'r') as file:
-            content = file.read()
-            entry.delete(0, tk.END)
-            entry.insert(0, content)
+# def upload_file():
+#     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+#     if file_path:
+#         with open(file_path, 'r') as file:
+#             content = file.read()
+#             entry.delete(0, tk.END)
+#             entry.insert(0, content)
 
-def train(seq, h):
-    doc.add_doc(seq,h)  
+# def train(seq, h):
+#     doc.add_doc(seq,h)  
 
 
 # ------------------------------------------------------------------------------------------------------------
@@ -202,6 +207,7 @@ def create_network():
     specified_node = eva_node_entry.get()
     G = nx.DiGraph()
     G.add_edges_from(doc.get_edge_table())
+    print(doc.get_edge_table())
 
     # Create a new Matplotlib figure for the network graph
     fig, ax = plt.subplots()
@@ -264,21 +270,183 @@ def create_network():
     
 
 # ------------------------------------------------------------------------------------------------------------
+class MyFrame(customtkinter.CTkFrame):
+    def __init__(self, master, title):
+        super().__init__(master, fg_color="yellow")
+
+        self.title = customtkinter.CTkLabel(self, text=title, fg_color="grey30", corner_radius=20)
+        self.title.grid(row=0, column=0)
+
+class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
+    def __init__(self, master, seq_list):
+        super().__init__(master, fg_color="grey30")
+        # self.variable = customtkinter.StringVar()
+        self.seq_list = seq_list
+        self.checklists = []
+
+        self.grid_columnconfigure(0, weight=1)
+
+        for i, seq_num in enumerate(self.seq_list):
+            seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=50)
+            seq_scroll.grid(row=i, column=0, pady=(0, 5), sticky="we")
+            checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq_num)), font=("Ariel", 40))
+            checkbox.grid(row=i, column=0, pady=(0, 5), sticky="we")
+            self.checklists.append(checkbox)
+
+    def get_checklist(self):
+        checked_checklists = []
+        for checklist in self.checklists:
+            if checklist.get() == 1:
+                print(checklist.cget("text"), " Type: ", type(checklist.cget("text")))
+                try:
+                    checked_checklists.append(ast.literal_eval(checklist.cget("text")))
+                except:
+                    print("error")
+        return checked_checklists
+            
+    
+
+class MyTabView(customtkinter.CTkTabview):
+
+    def __init__(self, master):
+        super().__init__(master)
+        self.tab1 = self.add("Learning Tab")
+        self.tab2 = self.add("Prediction Tab")
+        self.tab3 = self.add("Evaluation Tab")
+
+        self.seq_list = []
+
+        self.create_learning_tab()
+        self.create_prediction_tab()
+        self.create_evaluation_tab()
+
+    def create_learning_tab(self):
+        # self.learning_frame = MyFrame(self.tab1, "Learning Phase")
+        # self.learning_frame.grid(row=0, column=0)
+
+        self.title = customtkinter.CTkLabel(self.tab1, text="Learning Phase", fg_color="grey30", corner_radius=20)
+        self.title.grid(row=0, column=0, pady=(0, 10), sticky="w")
+            
+        upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
+        upload_btn.grid(row=1, column=0, pady=(0, 10), sticky="w")
+
+        self.seq_entry = customtkinter.CTkEntry(self.tab1)
+        self.seq_entry.grid(row=1, column=1, padx=(10, 0), pady=(0, 10), ipadx=100)
+
+        train_btn = customtkinter.CTkButton(self.tab1, text="Add Sequence", command=self.get_numbers)
+        train_btn.grid(row=2, column=0, pady=(0, 10), sticky="w")
+
+        self.number_seq_frame = NumberSequenceFrame(self.tab1, self.seq_list)
+        self.number_seq_frame.grid(row=3, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
+        self.tab1.grid_rowconfigure(3, weight=1) # Expand an entire of row 3 to fit the window
+
+        self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.draw_graph)
+        self.create_network.grid(row=4, column=0)
+
+        # self.text_box = customtkinter.CTkTextbox(self.tab1, fg_color="white", font=("Ariel", 40), text_color="Black")
+        # self.text_box.grid(row=1, column=2, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=3)
+        
+        # self.draw_graph()
+
+    def draw_graph(self):
+        # Create a graph
+        G = nx.Graph()
+
+        # Connect nodes in each sequence
+        for seq in self.number_seq_frame.get_checklist():
+            if len(seq) > 1:
+                G.add_edges_from(zip(seq, seq[1:]))
+            else:
+                G.add_node(seq[0])  # Add a single node if the sequence has only one element
+
+        # Draw the graph
+        pos = nx.spring_layout(G)
+
+        
+        fig, ax = plt.subplots(figsize=(6, 4))
+        nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
+                font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=0.7, ax=ax)
+
+        # Draw the graph in a Tkinter canvas
+        canvas = FigureCanvasTkAgg(fig, master=self.tab1)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=1, column=2, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=3)
+        self.tab1.grid_columnconfigure(2, weight=1) # Expand an entire of column 2 to fit the window
+
+
+
+    def get_numbers(self):
+        input_values = self.seq_entry.get()
+        numbers = [int(num) for num in input_values.split(',')]
+        self.seq_list.append(numbers)
+        self.number_seq_frame = NumberSequenceFrame(self.tab1, self.seq_list)
+        self.number_seq_frame.grid(row=3, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
+
+        # self.display_number_network()  
+        # self.train_data(numbers, 5)
+        
+        
+
+    def display_number_network(self):
+        self.text_box.configure(state="normal")
+        self.text_box.delete("0.0", tk.END)
+        self.text_box.insert("0.0", "\n".join([str(tuple(num)) for num in self.seq_list]))
+        self.text_box.configure(state="disabled")
+
+
+    def upload_file(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if file_path:
+            with open(file_path, 'r') as file:
+                content = file.read()
+                self.seq_entry.delete(0, tk.END)
+                self.seq_entry.insert(0, content)
+
+    def train_data(self, seq, h):
+        doc.add_doc(seq, h)
+
+# ---------------------
+
+    def create_prediction_tab(self):
+        # self.prediction_frame = MyFrame(self.tab2, "Prediction Phase")
+        # self.prediction_frame.grid(row=0, column=0, padx=0, pady=0)
+        ...
+
+    def create_evaluation_tab(self):
+        # self.evaluation_frame = MyFrame(self.tab3, "Evaluation Phase")
+        # self.evaluation_frame.grid(row=0, column=0, padx=0, pady=0)
+        ...
+
+    
+class App(customtkinter.CTk):
+
+    def __init__(self):
+        super().__init__()
+        self.title("Graph Learner GUI")
+        self.geometry("1920x1080")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.tab_view = MyTabView(self)
+        self.tab_view.grid(row=0, column=0, ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
 
 
 def main():
-    window = tk.Tk()
-    window.geometry('800x700')
-    window.title("Graph Learning GUI ")
+    # window = tk.Tk()
+    # window.geometry('800x700')
+    # window.title("Graph Learning GUI ")
 
-    notebook = ttk.Notebook(window)
+    # notebook = ttk.Notebook(window)
 
-    create_learning_page(notebook)
-    create_prediction_page(notebook)
-    create_evaluation_page(notebook)
+    # create_learning_page(notebook)
+    # create_prediction_page(notebook)
+    # create_evaluation_page(notebook)
 
-    notebook.pack(fill=tk.BOTH, expand=True)
-    window.mainloop()
+    # notebook.pack(fill=tk.BOTH, expand=True)
+    # window.mainloop()
+
+    app = App()
+    app.mainloop()
 
 if __name__ == "__main__":
     main()

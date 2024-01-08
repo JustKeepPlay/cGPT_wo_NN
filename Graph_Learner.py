@@ -268,18 +268,22 @@ class doc_graph:
     edges = self.check_seq(seq)
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
+      print("Edge = 0")
         #If no edges had a positive filter response try sequence without its first item.
         #Repeat until an edge(s) has a positive response.
       for k in range(len(seq)):
         edges = self.check_seq(seq[k:])
         if len(edges) > 0: break
     if len(edges) == 1:
+      print("Edge = 1")
         #If only 1 edge has a positive filter response its associated word is predicted.
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:
+      print("Edge > 1")
         #If more than 1 edge has a positive response choose based on generation mode.
       if self.gen_mode == 'max':
+        print("Mode: Max")
         #Select the edge in edges with the max Pi
         emax = 0
         edge = (None, None)
@@ -292,13 +296,14 @@ class doc_graph:
         prompt.append(edge[1])
 
       elif self.gen_mode == 'rand':
+        print("Mode: Random")
         #Randomly select from the set of edges.
         edge = random.choice(edges)
         prompt.append(edge[1])
 
       elif self.gen_mode == 'wrand':
         #Randomly select edge based on the probability. 
-        print("This is wrand")
+        print("Mode: Weight random")
         totalWeight = 0
         probs = []
         weights = []

@@ -1,37 +1,53 @@
 import tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-import matplotlib.pyplot as plt
+from tkinter import ttk
 import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# Create a simple graph for illustration
-G = nx.Graph()
-G.add_edges_from([(1, 2), (2, 3), (3, 1)])
+def display_network():
+    # Create an empty graph
+    G = nx.Graph()
+
+    # Add selected nodes to the graph
+    for i in range(1, 5):
+        if checkbox_vars[i-1].get():
+            G.add_node(i)
+
+    # Add edges (customize this based on your network structure)
+    G.add_edges_from([(1, 2), (2, 3), (3, 4), (4, 1)])
+
+    # Draw the network
+    pos = nx.spring_layout(G)
+    nx.draw(G, pos, with_labels=True, font_weight='bold', node_color='skyblue', edge_color='gray')
+
+    # Display the network in a Tkinter window
+    canvas.draw()
+
+def on_checkbox_change():
+    display_network()
 
 # Create a Tkinter window
-evaluation_page = tk.Tk()
-evaluation_page.title("NetworkX Graph with Custom Toolbar")
+root = tk.Tk()
+root.title("Dynamic Network Display with Tkinter and NetworkX")
 
-# Create a Matplotlib figure and a NetworkX graph
-fig, ax = plt.subplots()
-nx.draw(G, with_labels=True, ax=ax)
+# Create checkboxes
+checkbox_vars = []
+checkboxes = []
+for i in range(1, 5):
+    var = tk.IntVar()
+    checkbox_vars.append(var)
+    checkbox = ttk.Checkbutton(root, text=f"Node {i}", variable=var, command=on_checkbox_change)
+    checkboxes.append(checkbox)
+    checkbox.grid(row=i, column=0, sticky=tk.W)
 
-# Create a canvas to embed Matplotlib figure in Tkinter window
-canvas = FigureCanvasTkAgg(fig, master=evaluation_page)
+# Create a Matplotlib figure
+fig, ax = plt.subplots(figsize=(5, 5))
+canvas = FigureCanvasTkAgg(fig, master=root)
 canvas_widget = canvas.get_tk_widget()
+canvas_widget.grid(row=0, column=1, rowspan=5)
 
-# Create a custom toolbar similar to plt.show()
-class CustomToolbar(NavigationToolbar2Tk):
-    def __init__(self, canvas, parent):
-        NavigationToolbar2Tk.__init__(self, canvas, parent)
-        self._actions['Home'] = self.home_custom
+# Initial display
+on_checkbox_change()
 
-    def home_custom(self, *args):
-        # Add custom behavior for the Home button, if needed
-        print("Custom Home Button Clicked")
-
-# Add the custom toolbar to the Tkinter window
-toolbar = CustomToolbar(canvas, evaluation_page)
-canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
-# Run the Tkinter event loop
-evaluation_page.mainloop()
+# Start the Tkinter event loop
+root.mainloop()
