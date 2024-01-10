@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 import customtkinter
 from tkinter import filedialog
 import matplotlib.pyplot as plt
@@ -7,9 +6,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from Graph_Learner import doc_graph
 import networkx as nx
 import ast
-
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import os
+import random
 
 doc = doc_graph(5, 'wrand')
 
@@ -278,20 +276,31 @@ class MyFrame(customtkinter.CTkFrame):
         self.title.grid(row=0, column=0)
 
 class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
-    def __init__(self, master, seq_list):
+    def __init__(self, master):
         super().__init__(master, fg_color="grey30")
         # self.variable = customtkinter.StringVar()
-        self.seq_list = seq_list
+        self.seq_list = []
         self.checklists = []
 
         self.grid_columnconfigure(0, weight=1)
 
-        for i, seq_num in enumerate(self.seq_list):
-            seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=50)
-            seq_scroll.grid(row=i, column=0, pady=(0, 5), sticky="we")
-            checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq_num)), font=("Ariel", 40))
-            checkbox.grid(row=i, column=0, pady=(0, 5), sticky="we")
-            self.checklists.append(checkbox)
+    def add_num_seq(self, seq):
+
+        self.seq_list.append(seq)
+        length = len(self.seq_list) - 1
+
+        # for i, seq_num in enumerate(self.seq_list):
+        #     seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=50)
+        #     seq_scroll.grid(row=i, column=0, pady=(0, 5), sticky="we")
+        #     checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq_num)), font=("Ariel", 40))
+        #     checkbox.grid(row=i, column=0, pady=(0, 5), sticky="we")
+        #     self.checklists.append(checkbox)
+
+        seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
+        seq_scroll.grid(row=length, column=0, pady=(0, 5), sticky="we")
+        checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
+        checkbox.grid(row=length, column=0, pady=(0, 5), sticky="we")
+        self.checklists.append(checkbox)
 
     def get_checklist(self):
         checked_checklists = []
@@ -320,37 +329,68 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_prediction_tab()
         self.create_evaluation_tab()
 
+    def generate_sequence(self):
+        # Generate a random number between 1 and 20 for the length of the sequence
+        sequence_length = random.randint(1, 20)
+
+        # Generate a sequence of positive integers
+        sequence = [str(random.randint(1, 100)) for _ in range(sequence_length)]
+
+        # Join the sequence with commas and add '#' at the end
+        sequence_str = ",".join(sequence) + "#"
+
+        return sequence_str
+    
+    def make_seq_file(self):
+        # Create "train_data" directory if it doesn't exist
+        train_data_dir = "train_data"
+        os.makedirs(train_data_dir, exist_ok=True)
+
+        # Save all 10 sequences in a single text file inside "train_data" directory
+        file_name = os.path.join(train_data_dir, "sequences.txt")
+        
+        with open(file_name, 'w') as file:
+            for i in range(10):
+                sequence = self.generate_sequence()
+                file.write(sequence + "\n")
+
+        print(f"All sequences saved in {file_name}")
+
+
     def create_learning_tab(self):
         # self.learning_frame = MyFrame(self.tab1, "Learning Phase")
         # self.learning_frame.grid(row=0, column=0)
-
-        self.title = customtkinter.CTkLabel(self.tab1, text="Learning Phase", fg_color="grey30", corner_radius=20)
-        self.title.grid(row=0, column=0, pady=(0, 10), sticky="w")
             
         upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
         upload_btn.grid(row=1, column=0, pady=(0, 10), sticky="w")
 
         self.seq_entry = customtkinter.CTkEntry(self.tab1)
-        self.seq_entry.grid(row=1, column=1, padx=(10, 0), pady=(0, 10), ipadx=100)
+        self.seq_entry.grid(row=0, column=0, padx=0, pady=(0, 10), ipadx=100)
 
         train_btn = customtkinter.CTkButton(self.tab1, text="Add Sequence", command=self.get_numbers)
-        train_btn.grid(row=2, column=0, pady=(0, 10), sticky="w")
+        train_btn.grid(row=0, column=1, padx=(10, 0), pady=(0, 10), sticky="w")
 
-        self.number_seq_frame = NumberSequenceFrame(self.tab1, self.seq_list)
-        self.number_seq_frame.grid(row=3, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
-        self.tab1.grid_rowconfigure(3, weight=1) # Expand an entire of row 3 to fit the window
+        clear_entry_btn = customtkinter.CTkButton(self.tab1, text="Clear Input", command=self.clear_entry)
+        clear_entry_btn.grid(row=1, column=1, padx=(10, 0), pady=(0, 10), sticky="w")
+
+        self.number_seq_frame = NumberSequenceFrame(self.tab1)
+        self.number_seq_frame.grid(row=2, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
+        self.tab1.grid_rowconfigure(2, weight=1) # Expand an entire of row 3 to fit the window
 
         self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.draw_graph)
-        self.create_network.grid(row=4, column=0)
+        self.create_network.grid(row=0, column=2, padx=(10, 0), sticky="nw")
 
         # self.text_box = customtkinter.CTkTextbox(self.tab1, fg_color="white", font=("Ariel", 40), text_color="Black")
         # self.text_box.grid(row=1, column=2, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=3)
         
         # self.draw_graph()
 
+    def clear_entry(self):
+        self.seq_entry.delete(0, tk.END)
+
     def draw_graph(self):
         # Create a graph
-        G = nx.Graph()
+        G = nx.DiGraph()
 
         # Connect nodes in each sequence
         for seq in self.number_seq_frame.get_checklist():
@@ -360,8 +400,7 @@ class MyTabView(customtkinter.CTkTabview):
                 G.add_node(seq[0])  # Add a single node if the sequence has only one element
 
         # Draw the graph
-        pos = nx.spring_layout(G)
-
+        pos = nx.kamada_kawai_layout(G)
         
         fig, ax = plt.subplots(figsize=(6, 4))
         nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
@@ -379,28 +418,44 @@ class MyTabView(customtkinter.CTkTabview):
         input_values = self.seq_entry.get()
         numbers = [int(num) for num in input_values.split(',')]
         self.seq_list.append(numbers)
-        self.number_seq_frame = NumberSequenceFrame(self.tab1, self.seq_list)
-        self.number_seq_frame.grid(row=3, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
+        self.number_seq_frame.add_num_seq(numbers)
+        # self.number_seq_frame = NumberSequenceFrame(self.tab1, self.seq_list)
+        # self.number_seq_frame.grid(row=2, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
 
         # self.display_number_network()  
         # self.train_data(numbers, 5)
+
+
+    # def upload_file(self):
+    #     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    #     if file_path:
+    #         with open(file_path, 'r') as file:
+    #             content = file.read()
+    #             self.seq_entry.delete(0, tk.END)
+    #             self.seq_entry.insert(0, content)
+    #             self.seq_entry.delete(0, tk.END)
         
+    def get_numbers_from_upload(self, content_before_hash):
+        numbers = [int(num) for num in content_before_hash.split(',')]
+        self.seq_list.append(numbers)
+        self.number_seq_frame.add_num_seq(numbers)
         
-
-    def display_number_network(self):
-        self.text_box.configure(state="normal")
-        self.text_box.delete("0.0", tk.END)
-        self.text_box.insert("0.0", "\n".join([str(tuple(num)) for num in self.seq_list]))
-        self.text_box.configure(state="disabled")
-
-
     def upload_file(self):
+        self.make_seq_file()
         file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
         if file_path:
             with open(file_path, 'r') as file:
-                content = file.read()
-                self.seq_entry.delete(0, tk.END)
-                self.seq_entry.insert(0, content)
+                for line in file:
+                    # Check if the line contains '#' character
+                    if '#' in line:
+                        # Extract content before '#'
+                        content_before_hash = line.split('#')[0].strip()
+                        # Perform the get_number() module here
+                        self.get_numbers_from_upload(content_before_hash)  # Assuming get_numbers() is a method in your class
+                    else:
+                        self.get_numbers_from_upload(content_before_hash)
+                        
+
 
     def train_data(self, seq, h):
         doc.add_doc(seq, h)
@@ -426,6 +481,7 @@ class App(customtkinter.CTk):
         self.geometry("1920x1080")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        customtkinter.set_appearance_mode("dark")
 
         self.tab_view = MyTabView(self)
         self.tab_view.grid(row=0, column=0, ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
