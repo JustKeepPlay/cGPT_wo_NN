@@ -268,17 +268,10 @@ def create_network():
     
 
 # ------------------------------------------------------------------------------------------------------------
-class MyFrame(customtkinter.CTkFrame):
-    def __init__(self, master, title):
-        super().__init__(master, fg_color="yellow")
-
-        self.title = customtkinter.CTkLabel(self, text=title, fg_color="grey30", corner_radius=20)
-        self.title.grid(row=0, column=0)
 
 class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="grey30")
-        # self.variable = customtkinter.StringVar()
         self.seq_list = []
         self.checklists = []
 
@@ -289,17 +282,10 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
         self.seq_list.append(seq)
         length = len(self.seq_list) - 1
 
-        # for i, seq_num in enumerate(self.seq_list):
-        #     seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=50)
-        #     seq_scroll.grid(row=i, column=0, pady=(0, 5), sticky="we")
-        #     checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq_num)), font=("Ariel", 40))
-        #     checkbox.grid(row=i, column=0, pady=(0, 5), sticky="we")
-        #     self.checklists.append(checkbox)
-
         seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
         seq_scroll.grid(row=length, column=0, pady=(0, 5), sticky="we")
         checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
-        checkbox.grid(row=length, column=0, pady=(0, 5), sticky="we")
+        checkbox.grid(row=0, column=0, sticky="we")
         self.checklists.append(checkbox)
 
     def get_checklist(self):
@@ -312,8 +298,27 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
                 except:
                     print("error")
         return checked_checklists
-            
+        
     
+class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="grey30")
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=3)
+
+        self.saved_seq_generated_list = []
+    
+    def add_generated_seq(self, seq):
+        self.saved_seq_generated_list.append(seq)
+        length = len(self.saved_seq_generated_list) - 1
+
+        seq_no = customtkinter.CTkLabel(self, text=str(length+1))
+        seq_no.grid(row=length, column=0)
+        seq_list = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
+        seq_list.grid(row=length, column=1, pady=(0, 5), sticky="we")
+        seq_num = customtkinter.CTkLabel(seq_list, text=str(tuple(seq)), font=("Ariel", 20))
+        seq_num.grid(row=0, column=0, sticky="we")
+        
 
 class MyTabView(customtkinter.CTkTabview):
 
@@ -328,6 +333,28 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_learning_tab()
         self.create_prediction_tab()
         self.create_evaluation_tab()
+
+        self.set("Prediction Tab")
+
+    def create_learning_tab(self):
+        upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
+        upload_btn.grid(row=1, column=0, pady=(0, 10), sticky="w")
+
+        self.seq_entry = customtkinter.CTkEntry(self.tab1)
+        self.seq_entry.grid(row=0, column=0, padx=0, pady=(0, 10), ipadx=100)
+
+        train_btn = customtkinter.CTkButton(self.tab1, text="Add Sequence", command=self.get_numbers)
+        train_btn.grid(row=0, column=1, padx=(10, 0), pady=(0, 10), sticky="w")
+
+        clear_entry_btn = customtkinter.CTkButton(self.tab1, text="Clear Input", command=self.clear_entry)
+        clear_entry_btn.grid(row=1, column=1, padx=(10, 0), pady=(0, 10), sticky="w")
+
+        self.number_seq_frame = NumberSequenceFrame(self.tab1)
+        self.number_seq_frame.grid(row=2, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
+        self.tab1.grid_rowconfigure(2, weight=1) # Expand an entire of row 3 to fit the window
+
+        self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.draw_graph)
+        self.create_network.grid(row=0, column=2, padx=(10, 0), sticky="nw")
 
     def generate_sequence(self):
         # Generate a random number between 1 and 20 for the length of the sequence
@@ -355,35 +382,6 @@ class MyTabView(customtkinter.CTkTabview):
                 file.write(sequence + "\n")
 
         print(f"All sequences saved in {file_name}")
-
-
-    def create_learning_tab(self):
-        # self.learning_frame = MyFrame(self.tab1, "Learning Phase")
-        # self.learning_frame.grid(row=0, column=0)
-            
-        upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
-        upload_btn.grid(row=1, column=0, pady=(0, 10), sticky="w")
-
-        self.seq_entry = customtkinter.CTkEntry(self.tab1)
-        self.seq_entry.grid(row=0, column=0, padx=0, pady=(0, 10), ipadx=100)
-
-        train_btn = customtkinter.CTkButton(self.tab1, text="Add Sequence", command=self.get_numbers)
-        train_btn.grid(row=0, column=1, padx=(10, 0), pady=(0, 10), sticky="w")
-
-        clear_entry_btn = customtkinter.CTkButton(self.tab1, text="Clear Input", command=self.clear_entry)
-        clear_entry_btn.grid(row=1, column=1, padx=(10, 0), pady=(0, 10), sticky="w")
-
-        self.number_seq_frame = NumberSequenceFrame(self.tab1)
-        self.number_seq_frame.grid(row=2, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
-        self.tab1.grid_rowconfigure(2, weight=1) # Expand an entire of row 3 to fit the window
-
-        self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.draw_graph)
-        self.create_network.grid(row=0, column=2, padx=(10, 0), sticky="nw")
-
-        # self.text_box = customtkinter.CTkTextbox(self.tab1, fg_color="white", font=("Ariel", 40), text_color="Black")
-        # self.text_box.grid(row=1, column=2, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=3)
-        
-        # self.draw_graph()
 
     def clear_entry(self):
         self.seq_entry.delete(0, tk.END)
@@ -419,21 +417,6 @@ class MyTabView(customtkinter.CTkTabview):
         numbers = [int(num) for num in input_values.split(',')]
         self.seq_list.append(numbers)
         self.number_seq_frame.add_num_seq(numbers)
-        # self.number_seq_frame = NumberSequenceFrame(self.tab1, self.seq_list)
-        # self.number_seq_frame.grid(row=2, column=0, pady=(0, 10), sticky="nsew", columnspan=2)
-
-        # self.display_number_network()  
-        # self.train_data(numbers, 5)
-
-
-    # def upload_file(self):
-    #     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-    #     if file_path:
-    #         with open(file_path, 'r') as file:
-    #             content = file.read()
-    #             self.seq_entry.delete(0, tk.END)
-    #             self.seq_entry.insert(0, content)
-    #             self.seq_entry.delete(0, tk.END)
         
     def get_numbers_from_upload(self, content_before_hash):
         numbers = [int(num) for num in content_before_hash.split(',')]
@@ -461,15 +444,60 @@ class MyTabView(customtkinter.CTkTabview):
         doc.add_doc(seq, h)
 
 # ---------------------
-
+        
+        
     def create_prediction_tab(self):
-        # self.prediction_frame = MyFrame(self.tab2, "Prediction Phase")
-        # self.prediction_frame.grid(row=0, column=0, padx=0, pady=0)
-        ...
+        self.tab2.grid_rowconfigure(1, weight=1)
+        self.tab2.grid_columnconfigure(7, weight=1)
+
+        number_label = customtkinter.CTkLabel(self.tab2, text="Number")
+        number_label.grid(row=0, column=0, padx=(0, 10))
+        self.number_field = customtkinter.CTkEntry(self.tab2)
+        self.number_field.grid(row=0, column=1, padx=(0, 10), ipadx=20)
+
+        history_label = customtkinter.CTkLabel(self.tab2, text="History")
+        history_label.grid(row=0, column=2, padx=(0, 10))
+        self.history_field = customtkinter.CTkEntry(self.tab2)
+        self.history_field.grid(row=0, column=3, padx=(0, 10), ipadx=20)
+
+        gen_label = customtkinter.CTkLabel(self.tab2, text="Generation Amount")
+        gen_label.grid(row=0, column=4, padx=(0, 10))
+        self.gen_field = customtkinter.CTkEntry(self.tab2)
+        self.gen_field.grid(row=0, column=5, padx=(0, 10), ipadx=20)
+
+        gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.generate_seq)
+        gen_btn.grid(row=0, column=6, padx=(0, 10))
+
+        self.pred_seq_frame = PredictSequenceFrame(self.tab2)
+        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+
+        self.text_box = customtkinter.CTkTextbox(self.tab2, fg_color="white", text_color="black", font=("Ariel", 40))
+        self.text_box.grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+
+
+    def generate_seq(self):
+        try:
+            if self.number_field == "" and self.history_field == "" and self.gen_field == "":
+                 self.text_box.insert(str(float(len(self.pred_seq_frame.saved_seq_generated_list + 1))), "One of the field is empty")
+            else:
+                history = int(self.history_field.get())
+                number = int(self.number_field.get())
+                generate = int(self.gen_field.get())
+
+                seq = [history, number, generate]
+                self.pred_seq_frame.add_generated_seq(seq)
+
+                self.text_box.insert(
+                    str(float(len(self.pred_seq_frame.saved_seq_generated_list))),
+                    f"Number: {seq[0]}, History {seq[1]}, Generate: {seq[2]}\n"
+                    )
+
+        except Exception as e:
+            self.text_box.delete("0.0", tk.END)
+            self.text_box.insert("0.0", e)
+    
 
     def create_evaluation_tab(self):
-        # self.evaluation_frame = MyFrame(self.tab3, "Evaluation Phase")
-        # self.evaluation_frame.grid(row=0, column=0, padx=0, pady=0)
         ...
 
     
