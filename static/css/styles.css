@@ -1,0 +1,12 @@
+/* Custom styles for navbar */
+.navbar-nav .nav-item:hover {
+    background-color: #e9ecef; /* Your hover color */
+}
+
+.navbar-nav .nav-item.active {
+    background-color: #007bff; /* Your active color */
+}
+
+.navbar-nav .nav-item.active a {
+    color: #ffffff !important; /* Your active text color */
+}
