@@ -382,20 +382,81 @@ class MainSequenceFrame(customtkinter.CTkFrame):
 class NetworkFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="yellow")
+        
+    def draw_network(self):
+        # Create a graph
+        G = nx.DiGraph()
+        G.add_edges_from(doc.edge_table)
+        # Draw the graph
+        pos = nx.kamada_kawai_layout(G)
+        
+        fig, ax = plt.subplots(figsize=(6, 4))
+        nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
+                font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=1, ax=ax)
+
+        # Draw the graph in a Tkinter canvas
+        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        customtkinter.CTkLabel(self, text="Network Frame", text_color="black").grid(row=0, column=0)
+
 
 class BarChartFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="lightblue")
+        self.sort_desc = True
+
+    def isDesc(self):
+        return "Descencding" if self.sort_desc else "Ascending"
+    
+    def setSortState(self):
+        self.sort_desc = not self.sort_desc
+        self.draw_Bar_Chart()
+
+    def draw_Bar_Chart(self):
+        edge_weights = doc.edges_amount
+        edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
+
+        try:
+            if self.sort_desc:
+                edges = [str(_) for _ in list(edge.keys())[-10:]]
+                values = list(edge.values())[-10:]
+            else:
+                edges = [str(_) for _ in list(edge.keys())[:10]]
+                values = list(edge.values())[:10]
+        except Exception as e:
+            print(e)
+        
+        fig = Figure(figsize=(7, 5), dpi=100)
+        ax = fig.add_subplot(111)
+
+        ax.clear()
+
+        try:
+            ax.barh(edges, values)
+        except Exception as e:
+            print(e)
+
+        # Adding labels and title
+        ax.set_xlabel('Values')
+        ax.set_ylabel('Edges')
+        ax.set_title('Horizontal Bar Chart')
+
+
+        # Draw the graph in a Tkinter canvas
+        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        customtkinter.CTkLabel(self, text="Bar Chart Frame", text_color="black").grid(row=0, column=0)
+
 
 class F1Frame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="lightgreen")
         self.grid_columnconfigure(0, weight=1)
-        customtkinter.CTkLabel(self, text="Bar Chart Frame", text_color="black").grid(row=0, column=0)
+        customtkinter.CTkLabel(self, text="F1", text_color="black").grid(row=0, column=0)
 
 class ErrorRateFrame(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -420,6 +481,7 @@ class MyTabView(customtkinter.CTkTabview):
 
         doc.add_doc([1,2,3,4,5,6,7,8,9,10,11,12,13], 6)
         doc.add_doc([1,2,3,4,5,4,3,2,1], 5)
+
         # doc.add_doc([1,3], 5)
         self.set("Prediction Tab")
 
@@ -601,7 +663,7 @@ class MyTabView(customtkinter.CTkTabview):
                 seq = [int(num) for num in content_before_hash.split(',')]
                 self.seq_list.append(seq)
                 history = random.randint(1, 100)
-                amount = random.randint(1, 10)
+                amount = random.randint(1, 5)
                 self.number_seq_frame.add_num_seq(seq, history=history, amount=amount)
             except Exception as e:
                 print(e)
@@ -648,7 +710,7 @@ class MyTabView(customtkinter.CTkTabview):
         
         
     def create_prediction_tab(self):
-        self.tab2.grid_rowconfigure(1, weight=1)
+        self.tab2.grid_rowconfigure(1, weight=2)
         # self.tab2.grid_rowconfigure((2,3), weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
 
@@ -676,8 +738,8 @@ class MyTabView(customtkinter.CTkTabview):
         gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.get_pred_num)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
 
-        # self.pred_seq_frame = PredictSequenceFrame(self.tab2)
-        # self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+        self.pred_seq_frame = PredictSequenceFrame(self.tab2)
+        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
 
         # factor_seq_frame = FactorSequenceFrame(self.tab2)
         # factor_seq_frame.grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
@@ -769,6 +831,16 @@ class MyTabView(customtkinter.CTkTabview):
             temp_gen_seq = list(map(list,temp_gen_seq))
             print('the seq gen is : ',temp_gen_seq)
 
+            try:
+                self.pred_seq_frame.saved_seq_generated_list.clear()
+                # for key, value in doc.edges_amount.items():
+                #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+                for key, value in doc.edge_table.items():
+                    self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+            except Exception as e:
+                print("Seq list problem")
+
+
             fig = Figure(figsize=(5,4), dpi=100)
             ax = fig.add_subplot(111)
 
@@ -787,28 +859,38 @@ class MyTabView(customtkinter.CTkTabview):
 
             canvas = FigureCanvasTkAgg(fig, master=self.tab2)
             canvas.draw()
-            # canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+            canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
             # canvas.get_tk_widget().grid(row=2, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
-            canvas.get_tk_widget().grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
+            # canvas.get_tk_widget().grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
             
         except Exception as e:
             print(e)
 
     def create_evaluation_tab(self):
-        self.tab3.grid_rowconfigure((0,1), weight=1)
+        self.tab3.grid_rowconfigure((1,2), weight=1)
         self.tab3.grid_columnconfigure((0,1), weight=1)
 
-        network_frame = NetworkFrame(self.tab3)
-        network_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        self.network_frame = NetworkFrame(self.tab3)
+        self.network_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
-        bar_chart_frame = BarChartFrame(self.tab3)
-        bar_chart_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        self.bar_chart_frame = BarChartFrame(self.tab3)
+        self.bar_chart_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 
-        f1_frame = F1Frame(self.tab3)
-        f1_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.f1_frame = F1Frame(self.tab3)
+        self.f1_frame.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
 
-        error_rate_frame = ErrorRateFrame(self.tab3)
-        error_rate_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        self.error_rate_frame = ErrorRateFrame(self.tab3)
+        self.error_rate_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
+
+        eva_btn = customtkinter.CTkButton(self.tab3, text="Evaluate", command=self.evaluated)
+        eva_btn.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+
+        sort_btn = customtkinter.CTkButton(self.tab3, text=self.bar_chart_frame.isDesc(), command=self.bar_chart_frame.setSortState)
+        sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+
+    def evaluated(self):
+        self.network_frame.draw_network()
+        self.bar_chart_frame.draw_Bar_Chart()
 
     
 class App(customtkinter.CTk):
