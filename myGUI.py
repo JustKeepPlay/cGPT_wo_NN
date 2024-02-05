@@ -301,7 +301,7 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
     #     except Exception as e:
     #         print(e)
 
-    def add_num_seq(self, seq):
+    def add_num_seq(self, seq, history=5, amount=1):
 
         if seq in self.seq_list:
             # If sequence already exists, find the index and update count_label
@@ -330,12 +330,12 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
 
             history_field = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
             history_field.grid(row=length, column=1, padx=(0, 5), pady=(0, 5), sticky="nsew")
-            history_field.insert("0.0", "5")
+            history_field.insert("0.0", str(history))
             self.seq_history.append(history_field)
 
             count_label = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
             count_label.grid(row=length, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
-            count_label.insert("0.0", "1")
+            count_label.insert("0.0", str(amount))
             self.count_labels.append(count_label)  # Added count_label to count_labels list
 
     def get_checklist(self):
@@ -589,7 +589,7 @@ class MyTabView(customtkinter.CTkTabview):
             try:
                 seq = [int(num) for num in input_values.split(',')]
                 self.seq_list.append(seq)
-                self.number_seq_frame.add_num_seq(seq)
+                self.number_seq_frame.add_num_seq(seq, 5, 1)
             except Exception as e:
                 print(f"Get Sequence error: {e}")
         else:
@@ -600,7 +600,9 @@ class MyTabView(customtkinter.CTkTabview):
             try:
                 seq = [int(num) for num in content_before_hash.split(',')]
                 self.seq_list.append(seq)
-                self.number_seq_frame.add_num_seq(seq)
+                history = random.randint(1, 100)
+                amount = random.randint(1, 10)
+                self.number_seq_frame.add_num_seq(seq, history=history, amount=amount)
             except Exception as e:
                 print(e)
         else:
