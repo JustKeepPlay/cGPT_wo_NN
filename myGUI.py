@@ -273,6 +273,7 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
         super().__init__(master, fg_color="grey30")
         self.seq_list = []
         self.count_labels = []
+        self.seq_history = []
         self.checklists = []
         self.checked_checklists = []
         # self.seq_scroll_list = []
@@ -317,15 +318,23 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
             self.seq_list.append(seq)
             length = len(self.seq_list) - 1
 
+            self.grid_columnconfigure(0, weight=2)
+            self.grid_columnconfigure((1,2), weight=1)
+
             seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
-            seq_scroll.grid(row=length, column=0, pady=(0, 5), sticky="we")
+            seq_scroll.grid(row=length, column=0, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
             checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
-            checkbox.grid(row=0, column=0, sticky="we")
+            checkbox.grid(row=0, column=0, sticky="ew")
             self.checklists.append(checkbox)
 
+            history_field = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
+            history_field.grid(row=length, column=1, padx=(0, 5), pady=(0, 5), sticky="nsew")
+            history_field.insert("0.0", "5")
+            self.seq_history.append(history_field)
+
             count_label = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
-            count_label.grid(row=length, column=1, sticky="nsew")
+            count_label.grid(row=length, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
             count_label.insert("0.0", "1")
             self.count_labels.append(count_label)  # Added count_label to count_labels list
 
@@ -360,6 +369,15 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
         seq_list.grid(row=length, column=1, pady=(0, 5), sticky="we")
         seq_num = customtkinter.CTkLabel(seq_list, text=self.saved_seq_generated_list[-1], font=("Ariel", 20))
         seq_num.grid(row=0, column=0, sticky="we")
+
+class FactorSequenceFrame(customtkinter.CTkScrollableFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="lightgreen")
+
+
+class MainSequenceFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="lightyellow")
 
 class NetworkFrame(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -403,7 +421,7 @@ class MyTabView(customtkinter.CTkTabview):
         doc.add_doc([1,2,3,4,5,6,7,8,9,10,11,12,13], 6)
         doc.add_doc([1,2,3,4,5,4,3,2,1], 5)
         # doc.add_doc([1,3], 5)
-        self.set("Evaluation Tab")
+        self.set("Prediction Tab")
 
     def create_learning_tab(self):
         upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
@@ -452,7 +470,7 @@ class MyTabView(customtkinter.CTkTabview):
 
     def generate_sequence(self):
         # Generate a random number between 1 and 20 for the length of the sequence
-        sequence_length = random.randint(1, 20)
+        sequence_length = random.randint(1, 100)
 
         # Generate a sequence of positive integers
         sequence = [str(random.randint(1, 100)) for _ in range(sequence_length)]
@@ -471,7 +489,7 @@ class MyTabView(customtkinter.CTkTabview):
         file_name = os.path.join(train_data_dir, "sequences.txt")
         
         with open(file_name, 'w') as file:
-            for i in range(10):
+            for i in range(50):
                 sequence = self.generate_sequence()
                 file.write(sequence + "\n")
 
@@ -607,7 +625,13 @@ class MyTabView(customtkinter.CTkTabview):
         try:
             checked_sequences = self.number_seq_frame.get_checklist()
             for seq in checked_sequences:
-                doc.add_doc(list(seq), 5)
+                index = self.number_seq_frame.seq_list.index(list(seq))
+                count = int(self.number_seq_frame.count_labels[index].get("0.0", "end"))
+                history = int(self.number_seq_frame.seq_history[index].get("0.0", "end"))
+
+                print(f"{seq}: {history}")
+                for _ in range(count):
+                    doc.add_doc(list(seq), history)
             self.show_checkmark()
 
         except Exception as e:
@@ -623,6 +647,7 @@ class MyTabView(customtkinter.CTkTabview):
         
     def create_prediction_tab(self):
         self.tab2.grid_rowconfigure(1, weight=1)
+        # self.tab2.grid_rowconfigure((2,3), weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
 
         number_label = customtkinter.CTkLabel(self.tab2, text="Sequence: ")
@@ -649,8 +674,14 @@ class MyTabView(customtkinter.CTkTabview):
         gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.get_pred_num)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
 
-        self.pred_seq_frame = PredictSequenceFrame(self.tab2)
-        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+        # self.pred_seq_frame = PredictSequenceFrame(self.tab2)
+        # self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+
+        # factor_seq_frame = FactorSequenceFrame(self.tab2)
+        # factor_seq_frame.grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
+
+        # main_seq_frame = MainSequenceFrame(self.tab2)
+        # main_seq_frame.grid(row=3, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
 
     def gen_seq_enter(self, event):
         try:
@@ -730,7 +761,7 @@ class MyTabView(customtkinter.CTkTabview):
             generate = int(self.gen_field.get())
             
             for i in range(50):
-                gen_num = doc.gen_next_n(number.copy(), generate, 6)
+                gen_num = doc.gen_next_n(number.copy(), generate, history)
                 temp_gen_seq.append(gen_num)
             temp_gen_seq = set(map(tuple,temp_gen_seq))
             temp_gen_seq = list(map(list,temp_gen_seq))
@@ -754,7 +785,9 @@ class MyTabView(customtkinter.CTkTabview):
 
             canvas = FigureCanvasTkAgg(fig, master=self.tab2)
             canvas.draw()
-            canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+            # canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+            # canvas.get_tk_widget().grid(row=2, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
+            canvas.get_tk_widget().grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
             
         except Exception as e:
             print(e)
