@@ -1,4 +1,5 @@
 import tkinter as tk
+from CTkMessagebox import CTkMessagebox
 import customtkinter
 from tkinter import filedialog
 import matplotlib.pyplot as plt
@@ -6,11 +7,9 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from Graph_Learner import doc_graph
 import networkx as nx
-import ast
-import os
-import random
+import ast, os, random
 
-doc = doc_graph(5, 'desc')
+doc = doc_graph(5, 'rand')
 
 # ------------------------------------------------------------------------------------------------------------
 
@@ -292,6 +291,15 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
             else:
                 checklist.select()
 
+    # def remove_seq(self):
+    #     try:
+    #         checked_sequences = self.get_checklist()
+    #         for seq in checked_sequences:
+    #             if seq in 
+
+    #     except Exception as e:
+    #         print(e)
+
     def add_num_seq(self, seq):
 
         if seq in self.seq_list:
@@ -316,41 +324,10 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
             checkbox.grid(row=0, column=0, sticky="we")
             self.checklists.append(checkbox)
 
-            # count_label = customtkinter.CTkLabel(self, text="1", font=("Ariel", 20))
-            # count_label.grid(row=length, column=1, sticky="we")
             count_label = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
             count_label.grid(row=length, column=1, sticky="nsew")
             count_label.insert("0.0", "1")
             self.count_labels.append(count_label)  # Added count_label to count_labels list
-
-        # self.seq_list.append(seq)
-        # length = len(self.seq_list) - 1
-
-        # seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
-        # seq_scroll.grid(row=length, column=0, pady=(0, 5), sticky="we")
-        # # self.seq_scroll_list.append(seq_scroll)
-        # checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
-        # checkbox.grid(row=0, column=0, sticky="we")
-        # self.checklists.append(checkbox)
-        # count_label = customtkinter.CTkLabel(seq_scroll, text=str(self.seq_list.count(seq)), font=("Ariel", 20))
-        # count_label.grid(row=0, column=1, sticky="e")
-
-        # if not any(seq == sublist for sublist in self.seq_list):
-            
-        # else:
-        #     count_label = customtkinter.CTkLabel(seq_scroll, text=str(self.seq_list.count(seq)), font=("Ariel", 20))
-        #     count_label.grid(row=0, column=1, sticky="e")
-            
-
-        # if self.seq_list[-1] == self.seq_list[-2]:
-            
-        # else:
-        #     seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
-        #     seq_scroll.grid(row=length, column=0, pady=(0, 5), sticky="we")
-        #     # self.seq_scroll_list.append(seq_scroll)
-        #     checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
-        #     checkbox.grid(row=0, column=0, sticky="we")
-        #     self.checklists.append(checkbox)
 
     def get_checklist(self):
         self.checked_checklists.clear()
@@ -363,22 +340,6 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
                 except:
                     print("error")
         return self.checked_checklists
-    
-    # def delete_seq(self, seq):
-    #     for i, checklist in enumerate(self.checklists):
-    #         if ast.literal_eval(checklist.cget("text")) == seq:
-    #             # Destroy the checklist widget
-    #             checklist.destroy()
-
-    #             # Destroy the corresponding CTkScrollableFrame
-    #             seq_scroll = self.seq_scroll_list[i]
-    #             seq_scroll.destroy()
-
-    #             # Remove items from lists
-    #             del self.checklists[i]
-    #             del self.seq_scroll_list[i]
-                
-    #             break
         
     
 class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
@@ -399,6 +360,30 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
         seq_list.grid(row=length, column=1, pady=(0, 5), sticky="we")
         seq_num = customtkinter.CTkLabel(seq_list, text=self.saved_seq_generated_list[-1], font=("Ariel", 20))
         seq_num.grid(row=0, column=0, sticky="we")
+
+class NetworkFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="yellow")
+        self.grid_columnconfigure(0, weight=1)
+        customtkinter.CTkLabel(self, text="Network Frame", text_color="black").grid(row=0, column=0)
+
+class BarChartFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="lightblue")
+        self.grid_columnconfigure(0, weight=1)
+        customtkinter.CTkLabel(self, text="Bar Chart Frame", text_color="black").grid(row=0, column=0)
+
+class F1Frame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="lightgreen")
+        self.grid_columnconfigure(0, weight=1)
+        customtkinter.CTkLabel(self, text="Bar Chart Frame", text_color="black").grid(row=0, column=0)
+
+class ErrorRateFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="orange")
+        self.grid_columnconfigure(0, weight=1)
+        customtkinter.CTkLabel(self, text="Error Rate Frame", text_color="black").grid(row=0, column=0)
         
 
 class MyTabView(customtkinter.CTkTabview):
@@ -415,9 +400,10 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_prediction_tab()
         self.create_evaluation_tab()
 
-        doc.add_doc([1,2,3,4,5,6,7,8,9,10,11,12,13], 5)
-        doc.add_doc([1,3], 5)
-        self.set("Prediction Tab")
+        doc.add_doc([1,2,3,4,5,6,7,8,9,10,11,12,13], 6)
+        doc.add_doc([1,2,3,4,5,4,3,2,1], 5)
+        # doc.add_doc([1,3], 5)
+        self.set("Evaluation Tab")
 
     def create_learning_tab(self):
         upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
@@ -428,14 +414,14 @@ class MyTabView(customtkinter.CTkTabview):
         self.seq_entry.insert(0, "1,2,3,4,5")
         self.seq_entry.bind("<Return>", self.add_seq_enter)
 
-        add_seq_btn = customtkinter.CTkButton(self.tab1, text="Add", width=30, command=self.get_numbers)
+        add_seq_btn = customtkinter.CTkButton(self.tab1, text="Add", width=30, command=self.get_seq)
         add_seq_btn.grid(row=1, column=1, padx=(0, 10), pady=(0, 10), sticky="w")
 
         clear_entry_btn = customtkinter.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
         clear_entry_btn.grid(row=1, column=2, pady=(0, 10), sticky="w")
 
         remove_seq_btn = customtkinter.CTkButton(self.tab1, text="Remove Sequence", fg_color="red", hover_color="darkred", command=self.remove_sequence)
-        remove_seq_btn.grid(row=4, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
+        remove_seq_btn.grid(row=5, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
         save_seq_btn = customtkinter.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
         save_seq_btn.grid(row=2, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
@@ -462,7 +448,7 @@ class MyTabView(customtkinter.CTkTabview):
             
 
     def add_seq_enter(self, event):
-        self.get_numbers()
+        self.get_seq()
 
     def generate_sequence(self):
         # Generate a random number between 1 and 20 for the length of the sequence
@@ -518,28 +504,6 @@ class MyTabView(customtkinter.CTkTabview):
         canvas.get_tk_widget().grid(row=1, column=3, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=4)
         self.tab1.grid_columnconfigure(3, weight=1) # Expand an entire of column 2 to fit the window
 
-        # # Example usage:
-        # file_path = '/Users/mashiro/internship-project/cGPT_wo_NN/sample.txt'
-        # result = self.process_txt_file(file_path)
-
-        # output_sequences = self.process_sequences(self.process_txt_file(file_path))
-        # print(output_sequences)
-
-        # fig, ax = plt.subplots()
-
-        # for sequence in output_sequences:
-        #     plt.plot(sequence, marker='o')
-
-        # plt.xlabel('Index')
-        # plt.ylabel('Value')
-        # plt.title('Sequences Plot')
-        # plt.legend(range(1, len(output_sequences) + 1))
-
-        # canvas = FigureCanvasTkAgg(ax.figure, master=self.tab1)
-        # canvas.draw()
-        # canvas.get_tk_widget().grid(row=1, column=2, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=3)
-        # self.tab1.grid_columnconfigure(2, weight=1) # Expand an entire of column 2 to fit the window
-
 
     def process_sequences(self, sequences):
             result = []
@@ -591,24 +555,38 @@ class MyTabView(customtkinter.CTkTabview):
                     if current_element:
                         elements.append(current_element)
                     
-                    self.get_numbers_from_upload(current_element)                    
+                    self.get_seq_from_upload(current_element)
 
-    def get_numbers(self):
+    def show_error(self):
+        # Show some error message
+        CTkMessagebox(title="Error", message="Non-numerical Sequence not allowed.", icon="cancel")
+
+    def isNumber(self, input_values):
+        return all(item.strip().replace('.', '').isdigit() for item in input_values.split(','))
+
+
+    def get_seq(self):
         input_values = self.seq_entry.get()
-        try:
-            numbers = [int(num) for num in input_values.split(',')]
-            self.seq_list.append(numbers)
-            self.number_seq_frame.add_num_seq(numbers)
-        except Exception as e:
-            print(e)
+        if self.isNumber(input_values):
+            try:
+                seq = [int(num) for num in input_values.split(',')]
+                self.seq_list.append(seq)
+                self.number_seq_frame.add_num_seq(seq)
+            except Exception as e:
+                print(f"Get Sequence error: {e}")
+        else:
+            self.show_error()
             
-    def get_numbers_from_upload(self, content_before_hash):
-        try:
-            numbers = [int(num) for num in content_before_hash.split(',')]
-            self.seq_list.append(numbers)
-            self.number_seq_frame.add_num_seq(numbers)
-        except Exception as e:
-            print(e)
+    def get_seq_from_upload(self, content_before_hash):
+        if self.isNumber(content_before_hash):
+            try:
+                seq = [int(num) for num in content_before_hash.split(',')]
+                self.seq_list.append(seq)
+                self.number_seq_frame.add_num_seq(seq)
+            except Exception as e:
+                print(e)
+        else:
+            self.show_error()
 
     def upload_file(self):
         self.make_seq_file()
@@ -621,21 +599,24 @@ class MyTabView(customtkinter.CTkTabview):
                         # Extract content before '#'
                         content_before_hash = line.split('#')[0].strip()
                         # Perform the get_number() module here
-                        self.get_numbers_from_upload(content_before_hash)  # Assuming get_numbers() is a method in your class
+                        self.get_seq_from_upload(content_before_hash)  # Assuming get_numbers() is a method in your class
                     else:
-                        self.get_numbers_from_upload(content_before_hash)
-                        
-
+                        self.get_seq_from_upload(content_before_hash)
 
     def train_data(self):
         try:
             checked_sequences = self.number_seq_frame.get_checklist()
             for seq in checked_sequences:
-                print(seq, " Trained.\n")
                 doc.add_doc(list(seq), 5)
+            self.show_checkmark()
 
         except Exception as e:
             print(e)
+
+    def show_checkmark(self):
+        # Show some positive message with the checkmark icon
+        CTkMessagebox(message="Data has been trained.",
+                    icon="check", option_1="OK")
 
 # ---------------------
         
@@ -648,14 +629,14 @@ class MyTabView(customtkinter.CTkTabview):
         number_label.grid(row=0, column=0, padx=(0, 10))
         self.number_field = customtkinter.CTkEntry(self.tab2)
         self.number_field.grid(row=0, column=1, padx=(0, 10), ipadx=20)
-        self.number_field.insert(0, "1")
+        self.number_field.insert(0, "1,2,3,4,5")
         self.number_field.bind("<Return>", self.gen_seq_enter)
 
         history_label = customtkinter.CTkLabel(self.tab2, text="History: ")
         history_label.grid(row=0, column=2, padx=(0, 10))
         self.history_field = customtkinter.CTkEntry(self.tab2)
         self.history_field.grid(row=0, column=3, padx=(0, 10), ipadx=20)
-        self.history_field.insert(0, "2")
+        self.history_field.insert(0, "4")
         self.history_field.bind("<Return>", self.gen_seq_enter)
 
         gen_label = customtkinter.CTkLabel(self.tab2, text="Generation Amount: ")
@@ -671,106 +652,102 @@ class MyTabView(customtkinter.CTkTabview):
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
         self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
 
-        # self.text_box = customtkinter.CTkTextbox(self.tab2, fg_color="white", text_color="black", font=("Ariel", 40))
-        # self.text_box.grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
-
-        # self.create_pred_graph.ax = None
-        # self.create_pred_graph.canvas = None
-
     def gen_seq_enter(self, event):
         try:
             self.get_pred_num()
         except Exception as e:
             print(e)
 
-    def generate_seq(self):
-        is_empty = len(self.number_field.get()) == 0 or len(self.history_field.get()) == 0 or len(self.gen_field.get()) == 0
-        was_empty = False
+    # def get_pred_num(self):
+    #     try:
+    #         history = int(self.history_field.get())
+    #         number = [int(num) for num in self.number_field.get().split(',')]
+    #         generate = int(self.gen_field.get())
 
-        if is_empty:
-            was_empty = is_empty
+    #         gen_num = doc.gen_next_n(number.copy(), generate, history)
 
-        try:
-            if is_empty:
-                self.text_box.delete("0.0", tk.END)
-                self.text_box.insert("0.0", "One or more field is empty, cannot proceed.\n")
-            else:
-                if was_empty:
-                    self.text_box.delete(str(float(len(self.pred_seq_frame.saved_seq_generated_list) - 1)), tk.END)
-                    was_empty = not was_empty
+    #         try:
+    #             self.pred_seq_frame.saved_seq_generated_list.clear()
+    #             # for key, value in doc.edges_amount.items():
+    #             #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+    #             for key, value in doc.edge_table.items():
+    #                 self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+    #         except Exception as e:
+    #             print("Seq list problem")
 
-                history = int(self.history_field.get())
-                number = [int(num) for num in self.number_field.get().split(',')]
-                generate = int(self.gen_field.get())
 
-                seq = [number, history, generate]
-                self.pred_seq_frame.add_generated_seq(seq)
+    #         fig = Figure(figsize=(5,4), dpi=100)
+    #         ax = fig.add_subplot(111)
 
-                self.text_box.insert(
-                    str(float(len(self.pred_seq_frame.saved_seq_generated_list))),
-                    f"Number seq: {seq[0]}, History {seq[1]}, Generate: {seq[2]}\n"
-                    )
-                
+    #         ax.clear()
 
-        except Exception as e:
-            if is_empty:
-                self.text_box.delete("0.0", "end")
-                self.text_box.insert("0.0", "Error: One or more field is empty, cannot proceed.\n")
+    #         # To plot Y-Axis
+    #         num_y = []
+    #         gen_y = []
 
+    #         try:
+    #             # Seperate input and generated as num_y and gen_y
+    #             for item in gen_num:
+    #                 if item in number:
+    #                     num_y.append(item)
+    #                 else:
+    #                     gen_y.append(item)
+    #         except Exception as e:
+    #             print(f"num_y, gen_y (Error): {e}")
+            
+    #         # To plot X-Axis
+    #         num_x = [item for item in range(1, len(num_y) + 1)] # [1, 2, 3, ..., N + 1] ; N = length of the input and + 1 because it start with 1
+    #         gen_x = [item for item in range(len(gen_num) - len(gen_y) + 1, len(gen_num) + 1)] # [N + 1, ..., M + 1]
+            
+
+    #         print(f"step_x: {num_x}, num_y: {num_y}")
+    #         print(f"gen_step_x: {gen_x}, gen_y: {gen_y}")
+
+    #         ax.plot(num_x, num_y, 'b') # Blue line
+    #         ax.plot(gen_x, gen_y, 'r') # Red line
+
+    #         ax.plot([num_x[-1], gen_x[0]], [num_y[-1], gen_y[0]], 'r') # Connect input sequence and generated sequence together with red line
+
+    #         ax.plot(num_x, num_y, 'bo')
+    #         ax.plot(gen_x, gen_y, 'ro')
+
+    #         ax.set_title("Graph_Learner")
+    #         ax.set_ylabel("Number")
+    #         ax.set_xlabel("Step")
+
+    #         canvas = FigureCanvasTkAgg(fig, master=self.tab2)
+    #         canvas.draw()
+    #         canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+            
+    #     except Exception as e:
+    #         print(e)
+            
     def get_pred_num(self):
         try:
+            temp_gen_seq = []
             history = int(self.history_field.get())
             number = [int(num) for num in self.number_field.get().split(',')]
             generate = int(self.gen_field.get())
-
-            gen_num = doc.gen_next_n(number.copy(), generate, 6)
-
-            self.pred_seq_frame.saved_seq_generated_list.clear()
-            for key, value in doc.edges_amount.items():
-                self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
-
+            
+            for i in range(50):
+                gen_num = doc.gen_next_n(number.copy(), generate, 6)
+                temp_gen_seq.append(gen_num)
+            temp_gen_seq = set(map(tuple,temp_gen_seq))
+            temp_gen_seq = list(map(list,temp_gen_seq))
+            print('the seq gen is : ',temp_gen_seq)
 
             fig = Figure(figsize=(5,4), dpi=100)
             ax = fig.add_subplot(111)
 
             ax.clear()
-
-            # num_x = [_ for _ in range(len(number))]
-            # num_y = number
-            # ax.plot(num_x, num_y)
-            # ax.plot(num_x, num_y, 'bo')
-
-            # gen_x = [_ for _ in range(len(number), len(gen_num) + 1)]
-            # gen_y = gen_num
-            # ax.plot(gen_x, gen_y, 'r')
-            # ax.plot(gen_x, gen_y, 'ro')
-
-            # To plot Y-Axis
-            num_y = []
-            gen_y = []
-
-            # Seperate input and generated as num_y and gen_y
-            for item in gen_num:
-                if item in number:
-                    num_y.append(item)
-                else:
-                    gen_y.append(item)
-
-            # To plot X-Axis
-            num_x = [item for item in range(1, len(num_y) + 1)] # [1, 2, 3, ..., N + 1] ; N = length of the input and + 1 because it start with 1
-            gen_x = [item for item in range(len(gen_num) - len(gen_y) + 1, len(gen_num) + 1)] # [N + 1, ..., M + 1]
-
-            print(f"num_x: {num_x}, num_y: {num_y}")
-            print(f"gen_x: {gen_x}, gen_y: {gen_y}")
-
-            ax.plot(num_x, num_y, 'b')
-            ax.plot(gen_x, gen_y, 'r')
-
-            ax.plot([num_x[-1], gen_x[0]], [num_y[-1], gen_y[0]], 'r') # Connect input sequence and generated sequence together with red line
-
-            ax.plot(num_x, num_y, 'bo')
-            ax.plot(gen_x, gen_y, 'ro')
-
+            for i in range(len(temp_gen_seq)):
+                ax.plot(range(len(temp_gen_seq[i])), temp_gen_seq[i], linestyle=':', color='red',marker='o')
+                for j, val in enumerate(temp_gen_seq[i]):
+                    ax.text(j, val, str(val), color='red', ha='right', va='bottom')
+            for j, val in enumerate(number):
+                ax.text(j, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
+            ax.plot(range(len(number)), number, marker='o', color='blue')
+        
             ax.set_title("Graph_Learner")
             ax.set_ylabel("Number")
             ax.set_xlabel("Step")
@@ -778,23 +755,25 @@ class MyTabView(customtkinter.CTkTabview):
             canvas = FigureCanvasTkAgg(fig, master=self.tab2)
             canvas.draw()
             canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
-
-            # # Draw the graph in a Tkinter canvas
-            # canvas = FigureCanvasTkAgg(fig, master=self.tab2)
-            # canvas.draw()
-            # canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
-            
-            # self.text_box.delete("0.0", "end")
-            # self.text_box.insert("0.0", f"Number: {number}\nGenerated: {gen_num}")
             
         except Exception as e:
             print(e)
-            # self.text_box.delete("0.0", "end")
-            # self.text_box.insert("0.0", e)
 
     def create_evaluation_tab(self):
-        # graph_frame = customtkinter.CTkFrame(self)
-        ...
+        self.tab3.grid_rowconfigure((0,1), weight=1)
+        self.tab3.grid_columnconfigure((0,1), weight=1)
+
+        network_frame = NetworkFrame(self.tab3)
+        network_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        bar_chart_frame = BarChartFrame(self.tab3)
+        bar_chart_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
+        f1_frame = F1Frame(self.tab3)
+        f1_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+
+        error_rate_frame = ErrorRateFrame(self.tab3)
+        error_rate_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
 
     
 class App(customtkinter.CTk):

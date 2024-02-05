@@ -231,6 +231,7 @@ class doc_graph:
 
       self.edge_to_bfilter_table[key] = bfilter
       self.edge_table[key] = hashes
+    print(doc, " Trained.\n")
     #return doc
 
   def add_text(self,prompt,text,h):
@@ -280,6 +281,7 @@ class doc_graph:
       #and therefore has no associated edges.
     hseq = hash(seq)
     edges = self.check_seq(seq)
+    print(f"After check_seq: {edges}")
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
         #If no edges had a positive filter response try sequence without its first item.
@@ -309,25 +311,21 @@ class doc_graph:
         print("Mode: Random")
         #Randomly select from the set of edges.
         edge = random.choice(edges)
+        totalWeight = len(edges)
+        for e in set(edges):
+          print(f"{e}: {self.edges_amount[e] / totalWeight * 100}%")
         prompt.append(edge[1])
 
       elif self.gen_mode == 'wrand':
         #Randomly select edge based on the probability. 
         print("Mode: Weight random")
-        totalWeight = 0
-        probs = []
-        weights = []
+        totalWeight = len(edges)
+        prob = []
         for e in edges:
-          #totalWeight is the sum of how often the edge have been seen
-          #sum = w1+w2+w3+....wn
-          totalWeight += len(self.edge_table[e])
-          #weightE is weight of the current edge
-          weightE = len(self.edge_table[e])
-          weights.append(weightE)
-        
-        for w in weights:
-          probs.append(w / totalWeight)
-        edge = random.choices(edges,probs)
+          prob.append(self.edges_amount[e] / totalWeight)
+          print(f"{self.edges_amount[e]} / {totalWeight} = {self.edges_amount[e] / totalWeight}")
+
+        edge = random.choices(edges, prob)
         prompt.append(edge[0][1])
 
       elif self.gen_mode == 'desc':
@@ -359,8 +357,10 @@ class doc_graph:
     #given a sequence load the bloom filters associated with its last item
     #then check which may contain the sequence
     #return fedges the list of edges which returned a positive from their bloom filter.
+    print(f"seq in check_seq: {seq}")
     node_key = seq[-1]
     edges = self.node_to_edge_table[node_key]
+    print(f"node_to_edge_table[{node_key}]: {edges}")
     fedges = []
     for e in edges:
       bfilter = self.edge_to_bfilter_table[e]

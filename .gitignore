@@ -2,6 +2,8 @@ dev-env
 app.py
 templates/
 static/
+testing.py
+graph_testing.py
 
 *.pyc
 __pycache__/

@@ -1,28 +1,16 @@
-import customtkinter
 
-def radiobutton_event():
-    print("radiobutton toggled, current value:", radio_var.get())
+def isNumber(input_values):
+    seq = [_ for _ in input_values.split(',')]
+    for item in seq:
+        if not isinstance(item, (int, float)):
+            return False
+    return True
 
-app = customtkinter.CTk()
-app.title("Testing")
-app.geometry("300x400")
 
-radio_var = customtkinter.IntVar(value=0)
-radiobutton_1 = customtkinter.CTkRadioButton(
-                                                app, 
-                                                text="CTkRadioButton 1", 
-                                                command=radiobutton_event, 
-                                                variable= radio_var, 
-                                                value=1
-                                            )
-radiobutton_1.grid(row=0, column=0, padx=0, pady=0)
-radiobutton_2 = customtkinter.CTkRadioButton(
-                                                app, 
-                                                text="CTkRadioButton 2",
-                                                command=radiobutton_event, 
-                                                variable= radio_var, 
-                                                value=2
-                                             )
-radiobutton_2.grid(row=1, column=0, padx=0, pady=0)
+input_values = "1,2,3,4,5"
 
-app.mainloop()
+if isNumber(input_values):
+    print(f"{input_values} is a number")
+else:
+    print(f"{input_values} is not a number")
+

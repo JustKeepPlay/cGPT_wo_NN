@@ -106,8 +106,52 @@
 # dynamic_graph = create_dynamic_graph(number_sequences, conflicts)
 # draw_dynamic_graph(dynamic_graph)
 
-list = [1,2,3,4,5]
+import random
 
-for i in range(len(list) - 1, 0, -1):
-    print(list[i])
+edges = [(1,2), (1,3), (1,4)]
+edges_amount = {}
+for edge in edges:
+    if edge not in edges_amount:
+        edges_amount[edge] = 1
+    else:
+        edges_amount[edge] += 1
+
+prob = []
+totalWeight = sum(edges_amount.values())
+
+for edge in edges_amount:
+    prob.append(edges_amount[edge] / totalWeight)
+
+
+amount = 500000
+one = 0
+two = 0
+three = 0
+for i in range(amount):
+    # edge = random.choices([_ for _ in edges_amount.keys()], prob)
+    edge = random.choice(edges)
+    if edge == (1,2):
+        one += 1
+    elif edge == (1,3):
+        two += 1
+    elif edge == (1,4):
+        three += 1
+    else:
+        continue
+
+total = one + two + three
+# Check if total is zero before performing division
+if total != 0:
+    print(f"(1,2): {one / total * 100}%")
+    print(f"(1,3): {two / total * 100}%")
+    print(f"(1,4): {three / total * 100}%")
+else:
+    print("No edges were selected.")
+    
+
+
+
+
+
+
 
