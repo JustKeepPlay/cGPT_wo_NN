@@ -253,7 +253,7 @@ class doc_graph:
   def gen_next_n(self,prompt,n,h):
     #Given a prompt and n return that prompt + n new words
     #Iteratively calls gen_next() n times.
-    for x in range(n):
+    for _ in range(n):
       prompt = self.gen_next(prompt,h)
     return prompt
 

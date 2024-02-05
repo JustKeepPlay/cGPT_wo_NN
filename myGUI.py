@@ -302,7 +302,6 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
     #         print(e)
 
     def add_num_seq(self, seq, history=5, amount=1):
-
         if seq in self.seq_list:
             # If sequence already exists, find the index and update count_label
             index = self.seq_list.index(seq)
@@ -325,6 +324,7 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
             seq_scroll.grid(row=length, column=0, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
             checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
+            checkbox.select()
             checkbox.grid(row=0, column=0, sticky="ew")
             self.checklists.append(checkbox)
 
@@ -386,9 +386,25 @@ class NetworkFrame(customtkinter.CTkFrame):
     def draw_network(self):
         # Create a graph
         G = nx.DiGraph()
-        G.add_edges_from(doc.edge_table)
+        edge_weights = doc.edges_amount
+        edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
+        try:
+            if tab_view.get_sort_state():
+                print("Desc")
+                edges = [_ for _ in list(edge.keys())[-10:]]
+            else:
+                print("Asec")
+                edges = [_ for _ in list(edge.keys())[:10]]
+        except Exception as e:
+            print(e)
+
+        G.add_edges_from(edges)
         # Draw the graph
         pos = nx.kamada_kawai_layout(G)
+
+        # Destroy the existing canvas if it exists
+        if hasattr(self, 'canvas'):
+            self.canvas.get_tk_widget().destroy()
         
         fig, ax = plt.subplots(figsize=(6, 4))
         nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
@@ -405,21 +421,13 @@ class NetworkFrame(customtkinter.CTkFrame):
 class BarChartFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="lightblue")
-        self.sort_desc = True
-
-    def isDesc(self):
-        return "Descencding" if self.sort_desc else "Ascending"
-    
-    def setSortState(self):
-        self.sort_desc = not self.sort_desc
-        self.draw_Bar_Chart()
 
     def draw_Bar_Chart(self):
         edge_weights = doc.edges_amount
         edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
 
         try:
-            if self.sort_desc:
+            if tab_view.get_sort_state():
                 edges = [str(_) for _ in list(edge.keys())[-10:]]
                 values = list(edge.values())[-10:]
             else:
@@ -427,6 +435,10 @@ class BarChartFrame(customtkinter.CTkFrame):
                 values = list(edge.values())[:10]
         except Exception as e:
             print(e)
+
+        # Destroy the existing canvas if it exists
+        if hasattr(self, 'canvas'):
+            self.canvas.get_tk_widget().destroy()
         
         fig = Figure(figsize=(7, 5), dpi=100)
         ax = fig.add_subplot(111)
@@ -479,11 +491,13 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_prediction_tab()
         self.create_evaluation_tab()
 
-        doc.add_doc([1,2,3,4,5,6,7,8,9,10,11,12,13], 6)
-        doc.add_doc([1,2,3,4,5,4,3,2,1], 5)
-
+        doc.add_doc([1,2,3,4,5,6,7,8,9], 5)
+        doc.add_doc([9,8,7,6,5,4,3,2,1], 6)
+        doc.add_doc([1,3,5,7,9,11,13,15], 3)
         # doc.add_doc([1,3], 5)
         self.set("Prediction Tab")
+
+        self.sort_desc = True
 
     def create_learning_tab(self):
         upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
@@ -506,18 +520,19 @@ class MyTabView(customtkinter.CTkTabview):
         save_seq_btn = customtkinter.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
         save_seq_btn.grid(row=2, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
-        self.train_btn = customtkinter.CTkButton(self.tab1, text="Train Data from checklist", command=self.train_data)
-        self.train_btn.grid(row=5, column=2, pady=(0, 10), sticky="e")
+        # self.train_btn = customtkinter.CTkButton(self.tab1, text="Train Data from checklist", command=self.train_data)
+        # self.train_btn.grid(row=5, column=2, pady=(0, 10), sticky="e")
 
         self.number_seq_frame = NumberSequenceFrame(self.tab1)
         self.number_seq_frame.grid(row=4, column=0, pady=(0, 10), sticky="nsew", columnspan=3)
         self.tab1.grid_rowconfigure(4, weight=1) # Expand an entire of row 3 to fit the window
 
         select_all_cb = customtkinter.CTkCheckBox(self.tab1, text="Select All", font=("Ariel", 20), command=self.number_seq_frame.select_all)
+        select_all_cb.select()
         select_all_cb.grid(row=3, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
-        self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.draw_graph)
-        self.create_network.grid(row=0, column=3, padx=(10, 0), sticky="nw")
+        self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.train_data)
+        self.create_network.grid(row=3, column=2, padx=(0, 10), pady=(0, 10))
 
     def remove_sequence(self):
         print("Remove Sequence Button clicked!")
@@ -581,7 +596,7 @@ class MyTabView(customtkinter.CTkTabview):
         # Draw the graph in a Tkinter canvas
         canvas = FigureCanvasTkAgg(fig, master=self.tab1)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=1, column=3, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=4)
+        canvas.get_tk_widget().grid(row=0, column=3, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=5)
         self.tab1.grid_columnconfigure(3, weight=1) # Expand an entire of column 2 to fit the window
 
 
@@ -686,6 +701,7 @@ class MyTabView(customtkinter.CTkTabview):
                         self.get_seq_from_upload(content_before_hash)
 
     def train_data(self):
+        self.draw_graph()
         try:
             checked_sequences = self.number_seq_frame.get_checklist()
             for seq in checked_sequences:
@@ -824,21 +840,21 @@ class MyTabView(customtkinter.CTkTabview):
             number = [int(num) for num in self.number_field.get().split(',')]
             generate = int(self.gen_field.get())
             
-            for i in range(50):
+            for i in range(10):
                 gen_num = doc.gen_next_n(number.copy(), generate, history)
                 temp_gen_seq.append(gen_num)
             temp_gen_seq = set(map(tuple,temp_gen_seq))
             temp_gen_seq = list(map(list,temp_gen_seq))
             print('the seq gen is : ',temp_gen_seq)
 
-            try:
-                self.pred_seq_frame.saved_seq_generated_list.clear()
-                # for key, value in doc.edges_amount.items():
-                #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
-                for key, value in doc.edge_table.items():
-                    self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
-            except Exception as e:
-                print("Seq list problem")
+            # try:
+            #     self.pred_seq_frame.saved_seq_generated_list.clear()
+            #     # for key, value in doc.edges_amount.items():
+            #     #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+            #     for key, value in doc.edge_table.items():
+            #         self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+            # except Exception as e:
+            #     print("Seq list problem")
 
 
             fig = Figure(figsize=(5,4), dpi=100)
@@ -885,12 +901,25 @@ class MyTabView(customtkinter.CTkTabview):
         eva_btn = customtkinter.CTkButton(self.tab3, text="Evaluate", command=self.evaluated)
         eva_btn.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        sort_btn = customtkinter.CTkButton(self.tab3, text=self.bar_chart_frame.isDesc(), command=self.bar_chart_frame.setSortState)
+        sort_btn = customtkinter.CTkButton(self.tab3, text=self.isDesc, command=self.set_sort_state)
         sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
 
     def evaluated(self):
         self.network_frame.draw_network()
         self.bar_chart_frame.draw_Bar_Chart()
+
+    def isDesc(self):
+        return "Descencding" if self.sort_desc else "Ascending"
+    
+    def get_sort_state(self):
+        return self.sort_desc
+    
+    def set_sort_state(self):
+        print(f"Before: {self.sort_desc}")
+        self.sort_desc = not self.sort_desc
+        print(f"After: {self.sort_desc}")
+        self.bar_chart_frame.draw_Bar_Chart()
+        self.network_frame.draw_network()
 
     
 class App(customtkinter.CTk):
@@ -903,8 +932,9 @@ class App(customtkinter.CTk):
         self.grid_columnconfigure(0, weight=1)
         customtkinter.set_appearance_mode("dark")
 
-        self.tab_view = MyTabView(self)
-        self.tab_view.grid(row=0, column=0, ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
+        global tab_view
+        tab_view = MyTabView(self)
+        tab_view.grid(row=0, column=0, ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
 
 
 def main():
