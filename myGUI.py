@@ -8,265 +8,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from Graph_Learner import doc_graph
 import networkx as nx
 import ast, os, random
+import math
 
 doc = doc_graph(5, 'rand')
-
-# ------------------------------------------------------------------------------------------------------------
-
-# def create_learning_page(notebook):
-#     global learning_page, entry, create_line_graph, result_label
-#     learning_page = tk.Frame(notebook)
-#     notebook.add(learning_page, text="Learning Phase")    
-
-#     upload_button = tk.Button(learning_page, text="Upload File", command=upload_file)
-#     upload_button.pack()
-
-#     input_label = tk.Label(learning_page, text="Enter numbers (separated by comma) or upload a file:")
-#     input_label.pack()
-
-#     entry = tk.Entry(learning_page)
-#     # entry.insert(0, "1,2,3")
-#     entry.pack()
-
-#     calculate_button = tk.Button(learning_page, text="Train", command=get_numbers)
-#     calculate_button.pack()
-
-#     result_label = tk.Label(learning_page, text="Result: ")
-#     result_label.pack()
-
-#     create_line_graph.ax = None
-#     create_line_graph.canvas = None
-
-# def create_line_graph(numbers, ax=None, canvas=None):
-#     if ax is None:
-#         fig, ax = plt.subplots()
-
-#     ax.clear()  # Clear the previous plot
-
-#     ax.plot(range(len(numbers)), numbers, marker='o')
-
-#     # Set x-axis locator to integer values
-#     ax.locator_params(axis='x', integer=True)
-#     ax.locator_params(axis='y', integer=True)
-
-#     # Set or update labels and title
-#     ax.set_xlabel('Index')
-#     ax.set_ylabel('Values')
-#     ax.set_title('Input Numbers')
-
-#     if canvas:
-#         canvas.get_tk_widget().destroy()
-
-#     create_line_graph.ax = ax
-#     create_line_graph.canvas = FigureCanvasTkAgg(ax.figure, master=learning_page)
-#     create_line_graph.canvas_widget = create_line_graph.canvas.get_tk_widget()
-#     create_line_graph.canvas_widget.pack()
-
-# def get_numbers():
-#     input_values = entry.get()
-#     numbers = [int(num) for num in input_values.split(',')]
-#     train(numbers, 5)
-#     # output = doc.gen_next(numbers, 5)
-#     result_label.config(text=f"Result: { numbers }")
-#     create_line_graph(numbers, ax=create_line_graph.ax, canvas=create_line_graph.canvas)
-
-# def upload_file():
-#     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-#     if file_path:
-#         with open(file_path, 'r') as file:
-#             content = file.read()
-#             entry.delete(0, tk.END)
-#             entry.insert(0, content)
-
-# def train(seq, h):
-#     doc.add_doc(seq,h)  
-
-
-# ------------------------------------------------------------------------------------------------------------
-
-def create_prediction_page(notebook):
-    global predict_page , pred_button , create_pred_graph, Pentry, Eentry
-    predict_page = tk.Frame(notebook)
-    notebook.add(predict_page, text="Predict Phase")
-
-    pred_input_label = tk.Label(predict_page, text="Enter the sequence:")
-    pred_input_label.pack()
-
-    Pentry = tk.Entry(predict_page)
-    Pentry.pack()
-
-    element_label = tk.Label(predict_page, text="How many to predict:")
-    element_label.pack()
-
-    Eentry = tk.Entry(predict_page, width=10)
-    Eentry.pack()
-
-    pred_button = tk.Button(predict_page, text="Predict", command=get_pred_num)
-    pred_button.pack()
-
-    create_pred_graph.ax = None
-    create_pred_graph.canvas = None
-
-def get_pred_num():
-    pred_input = Pentry.get()
-    element = Eentry.get()
-    nums = [int(num) for num in pred_input.split(',')]
-    num = nums.copy()
-    ele = int(element)
-    
-    pred_num = []
-
-    for i in range(ele):
-        pred_num = doc.gen_next(nums,5)
-
-    print(pred_num)
-
-    create_pred_graph(num, pred_num ,ele, ax=create_pred_graph.ax, canvas=create_pred_graph.canvas)
-    
-
-def create_pred_graph(numbers, Pred_num, ele, ax, canvas):
-    exd_num = Pred_num[len(Pred_num)-ele:]
-    print('number :',numbers)
-    print('Pred :',Pred_num)
-    print('extended :',exd_num)
-
-    # if ax is None:
-    fig, ax = plt.subplots()
-    
-    ax.clear()  # Clear the previous plot
-
-     # Plot the input numbers in blue
-    ax.plot(range(len(Pred_num)), Pred_num, linestyle=':', color='red')
-
-    ax.plot(range(len(numbers)), numbers, marker='o', color='blue')
-    
-    # Plot only the last element of the predicted number in red
-    
-    for i in range(ele):
-        ax.plot(len(numbers)+i , exd_num[i], marker='o', color='red')
-        plt.text(len(numbers)+i, exd_num[i], f'{exd_num[i]}', ha='right', va='bottom', c='red')
-        print('x=',len(numbers)+i,' y=',exd_num[i])
-
-    for x, y in zip(range(len(numbers)),numbers):
-        plt.text(x, y, f'{y}', ha='right', va='bottom',c='blue')  
-
-    # Set x-axis locator to integer values
-    ax.locator_params(axis='y', integer=True)
-    ax.locator_params(axis='x', integer=True)
-
-    # Set or update labels and title
-    ax.set_xlabel('Step')
-    ax.set_ylabel('Value')
-    ax.set_title('Prediction Graph')
-    
-    # Show legend
-    #ax.legend()
-
-    if canvas:
-        canvas.get_tk_widget().destroy()
-
-    create_pred_graph.ax = ax
-    create_pred_graph.canvas = FigureCanvasTkAgg(ax.figure, master=predict_page)
-    create_pred_graph.canvas_widget = create_pred_graph.canvas.get_tk_widget()
-    create_pred_graph.canvas_widget.pack()
-
-
-# ------------------------------------------------------------------------------------------------------------
-  
-
-def create_evaluation_page(notebook):
-    global evaluation_page, eva_node_entry, eva_friends_entry
-    evaluation_page = tk.Frame(notebook)
-    notebook.add(evaluation_page, text="Evaluation Phase")
-
-    eva_node_label = tk.Label(evaluation_page, text="Node: ")
-    eva_node_label.pack()
-    eva_node_entry = tk.Entry(evaluation_page)
-    eva_node_entry.pack()
-    
-
-    # Create a button to trigger the Evaluation on the evaluation page
-    evaluation_button = tk.Button(evaluation_page, text="Evaluate", command=create_network)
-    evaluation_button.pack()
-
-    # Initialize canvas variable
-    create_evaluation_page.canvas = None
-    create_evaluation_page.toolbar = None
-
-    # def get_node_edges(graph, node):
-    #     if graph.has_node(node):
-    #         edges = list(graph.edges(node))
-    #         return edges
-    #     else:
-    #         return None
-
-
-def create_network():
-    specified_node = eva_node_entry.get()
-    G = nx.DiGraph()
-    G.add_edges_from(doc.get_edge_table())
-    print(doc.get_edge_table())
-
-    # Create a new Matplotlib figure for the network graph
-    fig, ax = plt.subplots()
-    ax.set_title('Network Graph')
-
-    # Clear the previous network graph (if any)
-    if create_evaluation_page.canvas:
-        create_evaluation_page.canvas.get_tk_widget().destroy()
-    if create_evaluation_page.toolbar:
-        create_evaluation_page.toolbar.destroy()
-
-
-    try:
-        if len(eva_node_entry.get()) == 0:
-            pos = nx.kamada_kawai_layout(G)
-            # Draw the network graph
-            nx.draw(
-                G,
-                pos,
-                with_labels=True,
-                node_color='lightgreen'
-            )
-        else:
-            specified_node = int(specified_node)
-            if G.has_node(specified_node):
-                pos = nx.spring_layout(G)
-                # node_edges = get_node_edges(G, specified_node)
-                # print(f"Edges connected to Node {specified_node}: {node_edges}")
-
-                # # Create a subgraph with the specified edges
-                # subgraph_edges = [(specified_node, neighbor) for neighbor in G.neighbors(specified_node)]
-                # subgraph = G.subgraph(subgraph_edges)
-                subgraph = nx.ego_graph(G, specified_node)
-
-                # Draw the network graph
-                nx.draw(
-                    subgraph,
-                    pos,
-                    with_labels=True,
-                    node_color='lightgreen'
-                )
-            else:
-                ax.set_title('No node specified.')
-            
-    except:
-        print("An exception error")
-
-    # Embed the Matplotlib network graph in the Tkinter window
-    canvas = FigureCanvasTkAgg(fig, master=evaluation_page)
-    create_evaluation_page.canvas = canvas  # Store canvas for future destruction
-    canvas_widget = canvas.get_tk_widget()
-    canvas_widget.pack()
-
-    # Add the Matplotlib NavigationToolbar2Tk
-    toolbar = NavigationToolbar2Tk(canvas, evaluation_page)
-    create_evaluation_page.toolbar = toolbar  # Store toolbar for future destruction
-    toolbar.update()
-    canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
-    
-# ------------------------------------------------------------------------------------------------------------
 
 class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
     def __init__(self, master):
@@ -565,8 +309,9 @@ class MyTabView(customtkinter.CTkTabview):
         # Save all 10 sequences in a single text file inside "train_data" directory
         file_name = os.path.join(train_data_dir, "sequences.txt")
         
+        amount_of_seq = 25
         with open(file_name, 'w') as file:
-            for i in range(50):
+            for i in range(amount_of_seq):
                 sequence = self.generate_sequence()
                 file.write(sequence + "\n")
 
@@ -701,7 +446,7 @@ class MyTabView(customtkinter.CTkTabview):
                         self.get_seq_from_upload(content_before_hash)
 
     def train_data(self):
-        self.draw_graph()
+        self.create_network.configure(state="disabled")
         try:
             checked_sequences = self.number_seq_frame.get_checklist()
             for seq in checked_sequences:
@@ -712,20 +457,23 @@ class MyTabView(customtkinter.CTkTabview):
                 print(f"{seq}: {history}")
                 for _ in range(count):
                     doc.add_doc(list(seq), history)
+            self.draw_graph()
             self.show_checkmark()
-
+            self.create_network.configure(state="normal")
         except Exception as e:
             print(e)
 
     def show_checkmark(self):
         # Show some positive message with the checkmark icon
-        CTkMessagebox(message="Data has been trained.",
-                    icon="check", option_1="OK")
+        CTkMessagebox(header=True, title="Success", message="Sequence successfully trained.",
+                  icon="check", option_1="OK")
 
 # ---------------------
         
         
     def create_prediction_tab(self):
+        self.switch_var = customtkinter.StringVar(value="off")
+
         self.tab2.grid_rowconfigure(1, weight=2)
         # self.tab2.grid_rowconfigure((2,3), weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
@@ -751,8 +499,12 @@ class MyTabView(customtkinter.CTkTabview):
         self.gen_field.insert(0, "3")
         self.gen_field.bind("<Return>", self.gen_seq_enter)
 
-        gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.get_pred_num)
+        gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.choose_event)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
+
+        self.switch = customtkinter.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.choose_event,
+                                        variable=self.switch_var, onvalue="on", offvalue="off")
+        self.switch.grid(row=0, column=7, sticky="e")
 
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
         self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
@@ -765,7 +517,7 @@ class MyTabView(customtkinter.CTkTabview):
 
     def gen_seq_enter(self, event):
         try:
-            self.get_pred_num()
+            self.choose_event()
         except Exception as e:
             print(e)
 
@@ -835,17 +587,17 @@ class MyTabView(customtkinter.CTkTabview):
             
     def get_pred_num(self):
         try:
-            temp_gen_seq = []
+            self.temp_gen_seq = []
             history = int(self.history_field.get())
-            number = [int(num) for num in self.number_field.get().split(',')]
+            self.number = [int(num) for num in self.number_field.get().split(',')]
             generate = int(self.gen_field.get())
             
             for i in range(10):
-                gen_num = doc.gen_next_n(number.copy(), generate, history)
-                temp_gen_seq.append(gen_num)
-            temp_gen_seq = set(map(tuple,temp_gen_seq))
-            temp_gen_seq = list(map(list,temp_gen_seq))
-            print('the seq gen is : ',temp_gen_seq)
+                gen_num = doc.gen_next_n(self.number.copy(), generate, history)
+                self.temp_gen_seq.append(gen_num)
+            self.temp_gen_seq = set(map(tuple,self.temp_gen_seq))
+            self.temp_gen_seq = list(map(list,self.temp_gen_seq))
+            print('the seq gen is : ',self.temp_gen_seq)
 
             # try:
             #     self.pred_seq_frame.saved_seq_generated_list.clear()
@@ -856,18 +608,22 @@ class MyTabView(customtkinter.CTkTabview):
             # except Exception as e:
             #     print("Seq list problem")
 
+            # Destroy the existing canvas if it exists
+            if hasattr(self, 'canvas'):
+                self.canvas.get_tk_widget().destroy()
+
 
             fig = Figure(figsize=(5,4), dpi=100)
             ax = fig.add_subplot(111)
 
             ax.clear()
-            for i in range(len(temp_gen_seq)):
-                ax.plot(range(len(temp_gen_seq[i])), temp_gen_seq[i], linestyle=':', color='red',marker='o')
-                for j, val in enumerate(temp_gen_seq[i]):
+            for i in range(len(self.temp_gen_seq)):
+                ax.plot(range(len(self.temp_gen_seq[i])), self.temp_gen_seq[i], linestyle=':', color='red',marker='o')
+                for j, val in enumerate(self.temp_gen_seq[i]):
                     ax.text(j, val, str(val), color='red', ha='right', va='bottom')
-            for j, val in enumerate(number):
+            for j, val in enumerate(self.number):
                 ax.text(j, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
-            ax.plot(range(len(number)), number, marker='o', color='blue')
+            ax.plot(range(len(self.number)), self.number, marker='o', color='blue')
         
             ax.set_title("Graph_Learner")
             ax.set_ylabel("Number")
@@ -881,6 +637,55 @@ class MyTabView(customtkinter.CTkTabview):
             
         except Exception as e:
             print(e)
+
+    def choose_event(self):
+        if self.switch_var.get() == "off":
+            self.get_pred_num()
+        else:
+            if self.temp_gen_seq:
+                self.get_pred_num()
+                self.draw_network_from_gen()
+            else:
+                self.draw_network_from_gen()
+
+    def draw_network_from_gen(self):
+        # Create a graph
+        G = nx.DiGraph()
+
+        if len(self.temp_gen_seq) > 1:
+            edges = []
+            for seq in self.temp_gen_seq:
+                edges.extend(list(zip(seq[:-1], seq[1:])))
+            G.add_edges_from(edges)
+        else:
+            for seq in self.temp_gen_seq:
+                G.add_edges_from(list(zip(seq[:-1], seq[1:])))
+
+        color_list = []
+        print(G.nodes())
+        for num in G.nodes():
+            if num in self.number:
+                color_list.append('skyblue')
+            else:
+                color_list.append('red')
+        print(color_list)
+
+        # Destroy the existing canvas if it exists
+        if hasattr(self, 'canvas'):
+            self.canvas.get_tk_widget().destroy()
+            
+        # Draw the graph
+        # pos = nx.kamada_kawai_layout(G)
+        pos = nx.spring_layout(G, k=2/math.sqrt(G.order()))
+        
+        fig, ax = plt.subplots(figsize=(6, 4))
+        nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color=color_list,
+                font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=0.7, ax=ax, connectionstyle="arc3,rad=0.1")
+
+        # Draw the graph in a Tkinter canvas
+        canvas = FigureCanvasTkAgg(fig, master=self.tab2)
+        canvas.draw()
+        canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
 
     def create_evaluation_tab(self):
         self.tab3.grid_rowconfigure((1,2), weight=1)
@@ -901,23 +706,25 @@ class MyTabView(customtkinter.CTkTabview):
         eva_btn = customtkinter.CTkButton(self.tab3, text="Evaluate", command=self.evaluated)
         eva_btn.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        sort_btn = customtkinter.CTkButton(self.tab3, text=self.isDesc, command=self.set_sort_state)
-        sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        self.sort_btn = customtkinter.CTkButton(self.tab3, text="Descending", command=self.set_sort_state)
+        self.sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
 
     def evaluated(self):
         self.network_frame.draw_network()
         self.bar_chart_frame.draw_Bar_Chart()
 
     def isDesc(self):
-        return "Descencding" if self.sort_desc else "Ascending"
+        if self.sort_desc:
+            self.sort_btn.configure(text="Ascending")
+        else:
+            self.sort_btn.configure(text="Descending")
     
     def get_sort_state(self):
         return self.sort_desc
     
     def set_sort_state(self):
-        print(f"Before: {self.sort_desc}")
         self.sort_desc = not self.sort_desc
-        print(f"After: {self.sort_desc}")
+        self.isDesc()
         self.bar_chart_frame.draw_Bar_Chart()
         self.network_frame.draw_network()
 
