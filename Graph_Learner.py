@@ -281,7 +281,7 @@ class doc_graph:
       #and therefore has no associated edges.
     hseq = hash(seq)
     edges = self.check_seq(seq)
-    print(f"After check_seq: {edges}")
+    # print(f"After check_seq: {edges}")
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
         #If no edges had a positive filter response try sequence without its first item.
@@ -357,10 +357,10 @@ class doc_graph:
     #given a sequence load the bloom filters associated with its last item
     #then check which may contain the sequence
     #return fedges the list of edges which returned a positive from their bloom filter.
-    print(f"seq in check_seq: {seq}")
+    # print(f"seq in check_seq: {seq}")
     node_key = seq[-1]
     edges = self.node_to_edge_table[node_key]
-    print(f"node_to_edge_table[{node_key}]: {edges}")
+    # print(f"node_to_edge_table[{node_key}]: {edges}")
     fedges = []
     for e in edges:
       bfilter = self.edge_to_bfilter_table[e]
@@ -443,6 +443,7 @@ class Bloom_Filter_Mem_Eff2:
       self.addto(seq[x:lseq])
 
   def check(self,seq):
+    # print(f"Check seq: {seq}")
     #Check if a sequence is in the bloom filter
     if seq[0] == None:
         #remove None element from start of sequence

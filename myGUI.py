@@ -235,9 +235,9 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_prediction_tab()
         self.create_evaluation_tab()
 
-        doc.add_doc([1,2,3,4,5,6,7,8,9], 5)
-        doc.add_doc([9,8,7,6,5,4,3,2,1], 6)
-        doc.add_doc([1,3,5,7,9,11,13,15], 3)
+        # doc.add_doc([1,2,3,4,5,6,7,8,9], 5)
+        # doc.add_doc([9,8,7,6,5,4,3,2,1], 6)
+        # doc.add_doc([1,3,5,7,9,11,13,15], 3)
         # doc.add_doc([1,3], 5)
         self.set("Prediction Tab")
 
@@ -465,7 +465,7 @@ class MyTabView(customtkinter.CTkTabview):
 
     def show_checkmark(self):
         # Show some positive message with the checkmark icon
-        CTkMessagebox(header=True, title="Success", message="Sequence successfully trained.",
+        CTkMessagebox(header=True, title="Success", message="Sequence train successfully.",
                   icon="check", option_1="OK")
 
 # ---------------------
@@ -499,10 +499,10 @@ class MyTabView(customtkinter.CTkTabview):
         self.gen_field.insert(0, "3")
         self.gen_field.bind("<Return>", self.gen_seq_enter)
 
-        gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.choose_event)
+        gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.generate_by_switch)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
 
-        self.switch = customtkinter.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.choose_event,
+        self.switch = customtkinter.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.generate_by_switch,
                                         variable=self.switch_var, onvalue="on", offvalue="off")
         self.switch.grid(row=0, column=7, sticky="e")
 
@@ -517,7 +517,7 @@ class MyTabView(customtkinter.CTkTabview):
 
     def gen_seq_enter(self, event):
         try:
-            self.choose_event()
+            self.generate_by_switch()
         except Exception as e:
             print(e)
 
@@ -638,7 +638,17 @@ class MyTabView(customtkinter.CTkTabview):
         except Exception as e:
             print(e)
 
-    def choose_event(self):
+    def generate_all_possible_route(self):
+        # all_seq = []
+        # history = int(self.history_field.get())
+        # self.number = [int(num) for num in self.number_field.get().split(',')]
+        # generate = int(self.gen_field.get())
+        for edge, bfilter in doc.edge_table.items():
+            print(f"{edge}: {bfilter}")
+
+
+    def generate_by_switch(self):
+        self.generate_all_possible_route()
         if self.switch_var.get() == "off":
             self.get_pred_num()
         else:
@@ -647,6 +657,10 @@ class MyTabView(customtkinter.CTkTabview):
                 self.draw_network_from_gen()
             else:
                 self.draw_network_from_gen()
+
+    def list_all_seq(self):
+        for seq in self.seq_list:
+            self.pred_seq_frame.add_generated_seq(seq)
 
     def draw_network_from_gen(self):
         # Create a graph
@@ -706,7 +720,7 @@ class MyTabView(customtkinter.CTkTabview):
         eva_btn = customtkinter.CTkButton(self.tab3, text="Evaluate", command=self.evaluated)
         eva_btn.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        self.sort_btn = customtkinter.CTkButton(self.tab3, text="Descending", command=self.set_sort_state)
+        self.sort_btn = customtkinter.CTkButton(self.tab3, text="Ascending", command=self.set_sort_state)
         self.sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
 
     def evaluated(self):
@@ -715,15 +729,16 @@ class MyTabView(customtkinter.CTkTabview):
 
     def isDesc(self):
         if self.sort_desc:
-            self.sort_btn.configure(text="Ascending")
-        else:
             self.sort_btn.configure(text="Descending")
+        else:
+            self.sort_btn.configure(text="Ascending")
+
+        self.sort_desc = not self.sort_desc
     
     def get_sort_state(self):
         return self.sort_desc
     
     def set_sort_state(self):
-        self.sort_desc = not self.sort_desc
         self.isDesc()
         self.bar_chart_frame.draw_Bar_Chart()
         self.network_frame.draw_network()
