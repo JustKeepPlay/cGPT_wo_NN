@@ -281,6 +281,7 @@ class doc_graph:
       #and therefore has no associated edges.
     hseq = hash(seq)
     edges = self.check_seq(seq)
+    print(f"edges: {edges}")
     # print(f"After check_seq: {edges}")
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:

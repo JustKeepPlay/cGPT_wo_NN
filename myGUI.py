@@ -149,7 +149,8 @@ class NetworkFrame(customtkinter.CTkFrame):
         # Destroy the existing canvas if it exists
         if hasattr(self, 'canvas'):
             self.canvas.get_tk_widget().destroy()
-        
+
+        plt.close()
         fig, ax = plt.subplots(figsize=(6, 4))
         nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
                 font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=1, ax=ax)
@@ -258,9 +259,6 @@ class MyTabView(customtkinter.CTkTabview):
         clear_entry_btn = customtkinter.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
         clear_entry_btn.grid(row=1, column=2, pady=(0, 10), sticky="w")
 
-        remove_seq_btn = customtkinter.CTkButton(self.tab1, text="Remove Sequence", fg_color="red", hover_color="darkred", command=self.remove_sequence)
-        remove_seq_btn.grid(row=5, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
-
         save_seq_btn = customtkinter.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
         save_seq_btn.grid(row=2, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
@@ -268,8 +266,11 @@ class MyTabView(customtkinter.CTkTabview):
         # self.train_btn.grid(row=5, column=2, pady=(0, 10), sticky="e")
 
         self.number_seq_frame = NumberSequenceFrame(self.tab1)
-        self.number_seq_frame.grid(row=4, column=0, pady=(0, 10), sticky="nsew", columnspan=3)
-        self.tab1.grid_rowconfigure(4, weight=1) # Expand an entire of row 3 to fit the window
+        self.number_seq_frame.grid(row=5, column=0, pady=(0, 10), sticky="nsew", columnspan=3)
+        self.tab1.grid_rowconfigure(5, weight=1) # Expand an entire of row 3 to fit the window
+
+        customtkinter.CTkLabel(self.tab1, text="History", font=("Ariel", 20)).grid(row=4, column=0, sticky="e")
+        customtkinter.CTkLabel(self.tab1, text="Amount", font=("Ariel", 20)).grid(row=4, column=2)
 
         select_all_cb = customtkinter.CTkCheckBox(self.tab1, text="Select All", font=("Ariel", 20), command=self.number_seq_frame.select_all)
         select_all_cb.select()
@@ -277,6 +278,10 @@ class MyTabView(customtkinter.CTkTabview):
 
         self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.train_data)
         self.create_network.grid(row=3, column=2, padx=(0, 10), pady=(0, 10))
+
+
+        remove_seq_btn = customtkinter.CTkButton(self.tab1, text="Remove Sequence", fg_color="red", hover_color="darkred", command=self.remove_sequence)
+        remove_seq_btn.grid(row=6, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
     def remove_sequence(self):
         print("Remove Sequence Button clicked!")
@@ -341,7 +346,7 @@ class MyTabView(customtkinter.CTkTabview):
         # Draw the graph in a Tkinter canvas
         canvas = FigureCanvasTkAgg(fig, master=self.tab1)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=0, column=3, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=5)
+        canvas.get_tk_widget().grid(row=0, column=3, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=6)
         self.tab1.grid_columnconfigure(3, weight=1) # Expand an entire of column 2 to fit the window
 
 
@@ -457,9 +462,11 @@ class MyTabView(customtkinter.CTkTabview):
                 print(f"{seq}: {history}")
                 for _ in range(count):
                     doc.add_doc(list(seq), history)
+                # doc.add_doc(list(seq), history, count)
             self.draw_graph()
             self.show_checkmark()
             self.create_network.configure(state="normal")
+            print(f"Edge Amount: {doc.edges_amount}")
         except Exception as e:
             print(e)
 
@@ -701,6 +708,8 @@ class MyTabView(customtkinter.CTkTabview):
         canvas.draw()
         canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
 
+# --------------------------------------------------------------------------
+
     def create_evaluation_tab(self):
         self.tab3.grid_rowconfigure((1,2), weight=1)
         self.tab3.grid_columnconfigure((0,1), weight=1)
@@ -758,6 +767,21 @@ class App(customtkinter.CTk):
         tab_view = MyTabView(self)
         tab_view.grid(row=0, column=0, ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
 
+# def on_exit(event):
+#     # get yes/no answers
+#     msg = CTkMessagebox(title="Exit?", message="Do you want to close the program?",
+#                         icon="question", option_1="Cancel", option_2="No", option_3="Yes")
+#     response = msg.get()
+    
+#     if response=="Yes":
+#         for widgets in app.winfo_children():
+#             widgets.destroy()
+#         app.destroy()
+#     elif response == "No":
+#         return
+#     else:
+#         return
+    
 
 def main():
     # window = tk.Tk()
@@ -773,7 +797,9 @@ def main():
     # notebook.pack(fill=tk.BOTH, expand=True)
     # window.mainloop()
 
+    # global app
     app = App()
+    # app.bind("<Destroy>", on_exit)
     app.mainloop()
 
 if __name__ == "__main__":
