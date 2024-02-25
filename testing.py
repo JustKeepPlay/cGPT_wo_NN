@@ -1,37 +1,157 @@
-import tkinter as tk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-import matplotlib.pyplot as plt
-import networkx as nx
+# my_dict = {}
+# seq_list = ['1|2', '2|3', '3|4', '4|5', '5|6', '2|3']
+# weight_list = [10, 20, 30, 40, 50, 20]
 
-# Create a simple graph for illustration
-G = nx.Graph()
-G.add_edges_from([(1, 2), (2, 3), (3, 1)])
+# # seq : weight
 
-# Create a Tkinter window
-evaluation_page = tk.Tk()
-evaluation_page.title("NetworkX Graph with Custom Toolbar")
+# for i in range(6):
+#     if seq_list[i] in my_dict:
+#         my_dict[seq_list[i]] += weight_list[i]
+#     else:
+#         my_dict[seq_list[i]] = weight_list[i]
 
-# Create a Matplotlib figure and a NetworkX graph
-fig, ax = plt.subplots()
-nx.draw(G, with_labels=True, ax=ax)
+# print(my_dict)
+# print(my_dict['3|4'], " is ", type(my_dict['3|4']))
 
-# Create a canvas to embed Matplotlib figure in Tkinter window
-canvas = FigureCanvasTkAgg(fig, master=evaluation_page)
-canvas_widget = canvas.get_tk_widget()
+# import random 
 
-# Create a custom toolbar similar to plt.show()
-class CustomToolbar(NavigationToolbar2Tk):
-    def __init__(self, canvas, parent):
-        NavigationToolbar2Tk.__init__(self, canvas, parent)
-        self._actions['Home'] = self.home_custom
+# seq_list = {}
+# list = []
 
-    def home_custom(self, *args):
-        # Add custom behavior for the Home button, if needed
-        print("Custom Home Button Clicked")
 
-# Add the custom toolbar to the Tkinter window
-toolbar = CustomToolbar(canvas, evaluation_page)
-canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+# while seq_list[tuple(list)] is not None:
+#     for j in range(5):
+#         list.append(random.randint(1, 10))
 
-# Run the Tkinter event loop
-evaluation_page.mainloop()
+#     if tuple(list) in seq_list:
+#         seq_list[tuple(list)] = None
+#     else:
+#         seq_list[tuple(list)] = 1
+
+#     list.clear()
+    
+# for key, value in seq_list.items():
+#     print(f"{key}: {value}")
+
+# print("This dick has: ", len(seq_list.keys()))
+
+# import tkinter as tk
+
+# class NumberIncrementerApp:
+#     def __init__(self, master):
+#         self.master = master
+#         self.master.title("Number Incrementer")
+
+#         self.number = 0
+
+#         self.label = tk.Label(master, text=str(self.number))
+#         self.label.pack(pady=10)
+
+#         self.increment_button = tk.Button(master, text="Increment", command=self.increment_number)
+#         self.increment_button.pack()
+
+#     def increment_number(self):
+#         self.number += 1
+#         self.label.config(text=str(self.number))
+
+# def main():
+#     root = tk.Tk()
+#     app = NumberIncrementerApp(root)
+#     root.mainloop()
+
+# if __name__ == "__main__":
+#     main()
+
+# my_dict = {}
+
+# for i in range(5):
+#     my_dict[i] = {}
+#     for j in range(10):
+#         my_dict[i][j] = {}
+#         for k in range(3):
+#             my_dict[i][j][k] = f"Value: {k}"
+#         print(f"my_dict[{i}][{j}]]: {my_dict[i][j]}")
+#     print("\n")
+
+# import matplotlib.pyplot as plt
+# import networkx as nx
+
+# def create_dynamic_graph(number_sequences, conflicts):
+#     G = nx.DiGraph()
+
+#     for seq in number_sequences:
+#         G.add_node(seq)
+
+#     for conflict in conflicts:
+#         seq1, seq2 = conflict
+#         if G.has_edge(seq1, seq2):
+#             # Resolve conflict by adjusting the edge weight
+#             G[seq1][seq2]['weight'] += 1
+#         else:
+#             G.add_edge(seq1, seq2, weight=1)
+
+#     return G
+
+# def draw_dynamic_graph(G):
+#     pos = nx.spring_layout(G)  # You can use other layout algorithms as well
+#     labels = nx.get_edge_attributes(G, 'weight')
+#     nx.draw(G, pos, with_labels=True, node_size=700, node_color='skyblue', font_size=8)
+#     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+#     plt.show()
+
+# # Example usage:
+# number_sequences = [1, 2, 3, 4]
+# conflicts = [(1, 2), (2, 3), (3, 4), (1, 4)]
+
+# dynamic_graph = create_dynamic_graph(number_sequences, conflicts)
+# draw_dynamic_graph(dynamic_graph)
+
+import random
+
+edges = [(1,2), (1,3), (1,4)]
+edges_amount = {}
+for edge in edges:
+    if edge not in edges_amount:
+        edges_amount[edge] = 1
+    else:
+        edges_amount[edge] += 1
+
+prob = []
+totalWeight = sum(edges_amount.values())
+
+for edge in edges_amount:
+    prob.append(edges_amount[edge] / totalWeight)
+
+
+amount = 500000
+one = 0
+two = 0
+three = 0
+for i in range(amount):
+    # edge = random.choices([_ for _ in edges_amount.keys()], prob)
+    edge = random.choice(edges)
+    if edge == (1,2):
+        one += 1
+    elif edge == (1,3):
+        two += 1
+    elif edge == (1,4):
+        three += 1
+    else:
+        continue
+
+total = one + two + three
+# Check if total is zero before performing division
+if total != 0:
+    print(f"(1,2): {one / total * 100}%")
+    print(f"(1,3): {two / total * 100}%")
+    print(f"(1,4): {three / total * 100}%")
+else:
+    print("No edges were selected.")
+    
+
+
+
+
+
+
+

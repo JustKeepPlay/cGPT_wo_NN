@@ -152,7 +152,7 @@ class doc_graph:
   def get_edge_table(self):
     return self.edge_table
   
-  def __init__(self,h=5,gen_mode='max'):
+  def __init__(self,h,gen_mode='max'):
     #Initiate graph, assigning generate mode
     self.h = h #Currently serves no purpose but can be adapted to serve as an h_max, the maximum h allowed during generation
     self.gen_mode = gen_mode
@@ -164,11 +164,13 @@ class doc_graph:
     self.edge_to_bfilter_table = {}
     #Edge_to_bfilter_table stores edges and their associated bloom filters.
 
+    self.edges_amount = {}
+
   def set_gen_mode(self,gen_mode):
     #Sets the text generation mode
     self.gen_mode = gen_mode
 
-  def add_doc(self,doc,h=5):
+  def add_doc(self,doc,h):
     #Add a document and train a graph (if this is the first document added)
     #If graph already exists it trains in new data from doc
     ldoc = len(doc)
@@ -187,6 +189,11 @@ class doc_graph:
         #otherwise create a new edge set
         self.node_to_edge_table[w] = (key,)
 
+      if key in self.edges_amount:
+        self.edges_amount[key] += 1
+      else:
+        self.edges_amount[key] = 1
+
       if key in self.edge_table:
         #if edge has been seen before load its hash set Pi and bloom filter
         hashes = set(self.edge_table[key])
@@ -198,7 +205,6 @@ class doc_graph:
 
       hashes.add(hash((None,w)))
       bfilter.addto((None,w))
-      #print(key)
       for k in range(h-1,0,-1):
         #For k in depth h build sequences and subsequences of (W(n-h),...,W(n))
         if k >= i: continue #At start of doc k might exceed the word index, so stop building sequences
@@ -225,9 +231,10 @@ class doc_graph:
 
       self.edge_to_bfilter_table[key] = bfilter
       self.edge_table[key] = hashes
+    print(doc, " Trained.\n")
     #return doc
 
-  def add_text(self,prompt,text,h=5):
+  def add_text(self,prompt,text,h):
     if len(prompt) > h:
       prompt[-h:].extend(text)
     else:
@@ -235,7 +242,7 @@ class doc_graph:
     self.add_doc(prompt,h)
     return prompt
 
-  def add_text_and_gen_n(self,prompt,text,n,retrain=False,h=5):
+  def add_text_and_gen_n(self,prompt,text,n,retrain=False,h=None):
     #Add text to the current sequence and generate n new elements
     #If retrain is True text and the last h elements of prompt are
     #trained into the graph as if they were a new document.
@@ -243,14 +250,22 @@ class doc_graph:
     else: prompt.extend(text)
     return self.gen_next_n(prompt,n,h)
 
-  def gen_next_n(self,prompt,n,h=5):
+  def gen_next_n(self,prompt,n,h):
     #Given a prompt and n return that prompt + n new words
     #Iteratively calls gen_next() n times.
-    for x in range(n):
+    for _ in range(n):
       prompt = self.gen_next(prompt,h)
     return prompt
 
-  def gen_next(self,prompt,h=5):
+  def gen_next(self,prompt,h):
+    # print(f"Get Edge Table (1, 2): {self.edge_table[(1,2)]}")
+    # print(f"Node to Edge Table: {self.node_to_edge_table}")
+    # for item in self.node_to_edge_table:
+    #     count = 0
+    #     for edge in self.node_to_edge_table[item]:
+    #         count += 1
+    #     print(f"{self.node_to_edge_table[item]}: {count}")
+
     #Given a prompt generate the next word and return prompt + that word.
     ltext = len(prompt)
     if ltext < h:
@@ -266,6 +281,8 @@ class doc_graph:
       #and therefore has no associated edges.
     hseq = hash(seq)
     edges = self.check_seq(seq)
+    print(f"edges: {edges}")
+    # print(f"After check_seq: {edges}")
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
         #If no edges had a positive filter response try sequence without its first item.
@@ -292,13 +309,29 @@ class doc_graph:
         prompt.append(edge[1])
 
       elif self.gen_mode == 'rand':
+        print("Mode: Random")
         #Randomly select from the set of edges.
         edge = random.choice(edges)
+        totalWeight = len(edges)
+        for e in set(edges):
+          print(f"{e}: {self.edges_amount[e] / totalWeight * 100}%")
         prompt.append(edge[1])
 
       elif self.gen_mode == 'wrand':
         #Randomly select edge based on the probability. 
-        print("This is wrand")
+        print("Mode: Weight random")
+        totalWeight = len(edges)
+        prob = []
+        for e in edges:
+          prob.append(self.edges_amount[e] / totalWeight)
+          print(f"{self.edges_amount[e]} / {totalWeight} = {self.edges_amount[e] / totalWeight}")
+
+        edge = random.choices(edges, prob)
+        prompt.append(edge[0][1])
+
+      elif self.gen_mode == 'desc':
+        #Randomly select edge based on the probability. 
+        print("Mode: Desc")
         totalWeight = 0
         probs = []
         weights = []
@@ -313,6 +346,10 @@ class doc_graph:
         for w in weights:
           probs.append(w / totalWeight)
         edge = random.choices(edges,probs)
+
+        for key, value in self.edges_amount.items():
+          print(f"{key}: {value}")
+
         prompt.append(edge[0][1])
       
       return prompt
@@ -321,8 +358,10 @@ class doc_graph:
     #given a sequence load the bloom filters associated with its last item
     #then check which may contain the sequence
     #return fedges the list of edges which returned a positive from their bloom filter.
+    # print(f"seq in check_seq: {seq}")
     node_key = seq[-1]
     edges = self.node_to_edge_table[node_key]
+    # print(f"node_to_edge_table[{node_key}]: {edges}")
     fedges = []
     for e in edges:
       bfilter = self.edge_to_bfilter_table[e]
@@ -405,6 +444,7 @@ class Bloom_Filter_Mem_Eff2:
       self.addto(seq[x:lseq])
 
   def check(self,seq):
+    # print(f"Check seq: {seq}")
     #Check if a sequence is in the bloom filter
     if seq[0] == None:
         #remove None element from start of sequence
