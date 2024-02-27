@@ -349,72 +349,55 @@ class MyTabView(customtkinter.CTkTabview):
         canvas.get_tk_widget().grid(row=0, column=3, padx=(10, 0), pady=(0, 10), sticky="nsew", rowspan=6)
         self.tab1.grid_columnconfigure(3, weight=1) # Expand an entire of column 2 to fit the window
 
+    def process_sequences(self, input_values):
+        if '*' in input_values:
+            # Split the string by '*'
+            parts = input_values.split('*')
 
-    def process_sequences(self, sequences):
-            result = []
+            # Extract the sequence and repeat count
+            sequence = parts[0].split(',')
+            multiplier = parts[1].replace('#', '')
 
-            for sequence in sequences:
-                current_sequence = []
-                i = 0
-
-                while i < len(sequence):
-                    item = sequence[i]
-                    if item.isdigit():
-                        current_sequence.append(int(item))
-                    elif item == '*':
-                        # Multiply the current sequence
-                        result.append(current_sequence * int(sequence[i + 1]))
-                        # Skip the next item (the multiplier)
-                        i += 1
-                        # Reset the current sequence
-                        current_sequence = []
-                    elif item == '#':
-                        # End the sequence
-                        if current_sequence:
-                            result.append(current_sequence)
-                            current_sequence = []
-                    i += 1
-
+            # Repeat the sequence and concatenate with #
+            result = ','.join(sequence * int(multiplier))
             return result
+        return input_values
 
-
-        # Example usage with multiple sequences
-
-    def process_txt_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
-        with open(file_path, 'r') as file:
-            for line in file:
-                line = line.strip()
-                if line:
-                    elements = []
-                    current_element = ""
-                    for char in line:
-                        if char in (',', '#', '*'):
-                            if current_element:
-                                elements.append(current_element)
-                            if char != ',':
-                                elements.append(char)
-                            current_element = ""
-                        else:
-                            current_element += char
-                    if current_element:
-                        elements.append(current_element)
+    # def process_txt_file(self):
+    #     file_path = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+    #     with open(file_path, 'r') as file:
+    #         for line in file:
+    #             line = line.strip()
+    #             if line:
+    #                 elements = []
+    #                 current_element = ""
+    #                 for char in line:
+    #                     if char in (',', '#', '*'):
+    #                         if current_element:
+    #                             elements.append(current_element)
+    #                         if char != ',':
+    #                             elements.append(char)
+    #                         current_element = ""
+    #                     else:
+    #                         current_element += char
+    #                 if current_element:
+    #                     elements.append(current_element)
                     
-                    self.get_seq_from_upload(current_element)
+    #                 self.get_seq_from_upload(current_element)
 
     def show_error(self):
         # Show some error message
         CTkMessagebox(title="Error", message="Non-numerical Sequence not allowed.", icon="cancel")
 
     def isNumber(self, input_values):
-        return all(item.strip().replace('.', '').isdigit() for item in input_values.split(','))
-
+        return all((i.strip().replace('.', '').isdigit() or i == '*' or i == "#" for i in item) for item in input_values.split(','))
 
     def get_seq(self):
         input_values = self.seq_entry.get()
         if self.isNumber(input_values):
+            seq_after_process = self.process_sequences(input_values)
             try:
-                seq = [int(num) for num in input_values.split(',')]
+                seq = [int(num) for num in seq_after_process.split(',')]
                 self.seq_list.append(seq)
                 self.number_seq_frame.add_num_seq(seq, 5, 1)
             except Exception as e:
@@ -424,8 +407,9 @@ class MyTabView(customtkinter.CTkTabview):
             
     def get_seq_from_upload(self, content_before_hash):
         if self.isNumber(content_before_hash):
+            seq_after_process = self.process_sequences(content_before_hash)
             try:
-                seq = [int(num) for num in content_before_hash.split(',')]
+                seq = [int(num) for num in seq_after_process.split(',')]
                 self.seq_list.append(seq)
                 history = random.randint(1, 100)
                 amount = random.randint(1, 5)
@@ -466,7 +450,9 @@ class MyTabView(customtkinter.CTkTabview):
             self.draw_graph()
             self.show_checkmark()
             self.create_network.configure(state="normal")
-            print(f"Edge Amount: {doc.edges_amount}")
+            print(f"Node to edge table: {doc.node_to_edge_table}")
+            print(f"Edge table: {doc.edge_table}")
+            print(f"Edge to bfilter table: {doc.edge_to_bfilter_table}")
         except Exception as e:
             print(e)
 
@@ -489,14 +475,14 @@ class MyTabView(customtkinter.CTkTabview):
         number_label.grid(row=0, column=0, padx=(0, 10))
         self.number_field = customtkinter.CTkEntry(self.tab2)
         self.number_field.grid(row=0, column=1, padx=(0, 10), ipadx=20)
-        self.number_field.insert(0, "1,2,3,4,5")
+        self.number_field.insert(0, "1,2")
         self.number_field.bind("<Return>", self.gen_seq_enter)
 
         history_label = customtkinter.CTkLabel(self.tab2, text="History: ")
         history_label.grid(row=0, column=2, padx=(0, 10))
         self.history_field = customtkinter.CTkEntry(self.tab2)
         self.history_field.grid(row=0, column=3, padx=(0, 10), ipadx=20)
-        self.history_field.insert(0, "4")
+        self.history_field.insert(0, "5")
         self.history_field.bind("<Return>", self.gen_seq_enter)
 
         gen_label = customtkinter.CTkLabel(self.tab2, text="Generation Amount: ")
@@ -740,7 +726,7 @@ class MyTabView(customtkinter.CTkTabview):
         if self.sort_desc:
             self.sort_btn.configure(text="Descending")
         else:
-            self.sort_btn.configure(text="Ascending")
+            self.sort_btn.configure(text="Ascendingf")
 
         self.sort_desc = not self.sort_desc
     
