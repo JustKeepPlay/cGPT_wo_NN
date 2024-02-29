@@ -148,8 +148,31 @@
 # else:
 #     print("No edges were selected.")
 
-seq = "1,2,3,4,5"
-print(seq * 2)
+
+data = {
+    1: ((1, 2), (1, 2)),
+    2: ((2, 3), (2, 4)),
+    3: ((3, 4),),
+    4: ((4, 5), (4, 6)),
+    6: ((6, 8),)
+}
+
+# Initialize an empty list to store the connected sequence
+connected_sequence = []
+
+# Iterate over the tuples in the dictionary and concatenate their elements
+for value in data.values():
+    for pair in set(value):
+        connected_sequence.extend(pair)
+
+print("Connected sequence:")
+print(connected_sequence)
+
+
+
+
+
+
     
 
 

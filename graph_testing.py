@@ -22,9 +22,9 @@ def draw_graph(sequence, ax):
 
 # Create a figure and subplots for each sequence
 fig = Figure(figsize=(5, 4), dpi=100)
-ax1 = fig.add_subplot(311)
-ax2 = fig.add_subplot(312)
-ax3 = fig.add_subplot(313)
+ax1 = fig.add_subplot(3,1,1, frameon=False)
+ax2 = fig.add_subplot(3,1,2, sharey=ax1, frameon=False)
+ax3 = fig.add_subplot(3,1,3, sharey=ax1, frameon=False)
 
 # Draw each graph
 draw_graph(list_1, ax1)

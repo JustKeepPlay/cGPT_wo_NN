@@ -240,7 +240,7 @@ class MyTabView(customtkinter.CTkTabview):
         # doc.add_doc([9,8,7,6,5,4,3,2,1], 6)
         # doc.add_doc([1,3,5,7,9,11,13,15], 3)
         # doc.add_doc([1,3], 5)
-        self.set("Prediction Tab")
+        self.set("Learning Tab")
 
         self.sort_desc = True
 
@@ -580,26 +580,36 @@ class MyTabView(customtkinter.CTkTabview):
             
     def get_pred_num(self):
         try:
-            self.temp_gen_seq = []
             history = int(self.history_field.get())
             self.number = [int(num) for num in self.number_field.get().split(',')]
             generate = int(self.gen_field.get())
-            
-            for i in range(10):
-                gen_num = doc.gen_next_n(self.number.copy(), generate, history)
-                self.temp_gen_seq.append(gen_num)
-            self.temp_gen_seq = set(map(tuple,self.temp_gen_seq))
-            self.temp_gen_seq = list(map(list,self.temp_gen_seq))
-            print('the seq gen is : ',self.temp_gen_seq)
 
-            # try:
-            #     self.pred_seq_frame.saved_seq_generated_list.clear()
-            #     # for key, value in doc.edges_amount.items():
-            #     #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
-            #     for key, value in doc.edge_table.items():
-            #         self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
-            # except Exception as e:
-            #     print("Seq list problem")
+            try:
+                self.pred_seq_frame.saved_seq_generated_list.clear()
+
+                sequences = []
+                lseq_num = self.number[-1]
+                if lseq_num in doc.node_to_edge_table:
+                    for edges in doc.node_to_edge_table.values():
+                        seq = []
+                        for edge in edges:
+                            seq.append(edge)
+                        sequences.append(seq)
+                    self.pred_seq_frame.add_generated_seq(f"{sequences}")
+
+                
+                # # Create a new dictionary with unique values corresponding to keys
+                # unique_edges = {}
+                # max_unique = 0
+                # for key, edges in doc.node_to_edge_table.items():
+                #     unique_edges[key] = tuple(set(edge for edge in edges))
+                #     if len(unique_edges[key]) > max_unique:
+                #         max_unique = len(unique_edges[key])
+
+                # for key, value in unique_edges.items():
+                #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+            except Exception as e:
+                print("Seq list problem")
 
             # Destroy the existing canvas if it exists
             if hasattr(self, 'canvas'):
@@ -607,20 +617,43 @@ class MyTabView(customtkinter.CTkTabview):
 
 
             fig = Figure(figsize=(5,4), dpi=100)
-            ax = fig.add_subplot(111)
+            ax = []
+            subplot = "31"
+            for i in range(3):
+                self.temp_gen_seq = []
+                gen_num = doc.gen_next_n(self.number.copy(), generate, history)
+                self.temp_gen_seq.append(gen_num)
+                self.temp_gen_seq = set(map(tuple,self.temp_gen_seq))
+                self.temp_gen_seq = list(map(list,self.temp_gen_seq))
 
-            ax.clear()
-            for i in range(len(self.temp_gen_seq)):
-                ax.plot(range(len(self.temp_gen_seq[i])), self.temp_gen_seq[i], linestyle=':', color='red',marker='o')
-                for j, val in enumerate(self.temp_gen_seq[i]):
-                    ax.text(j, val, str(val), color='red', ha='right', va='bottom')
-            for j, val in enumerate(self.number):
-                ax.text(j, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
-            ax.plot(range(len(self.number)), self.number, marker='o', color='blue')
+                print('the seq gen is : ',self.temp_gen_seq)
+                ax.append(fig.add_subplot(int(subplot + str(i + 1))))
+                for j in range(len(self.temp_gen_seq)):
+                    ax[-1].plot(range(len(self.temp_gen_seq[j])), self.temp_gen_seq[j], linestyle=':', color='red',marker='o')
+                    for k, val in enumerate(self.temp_gen_seq[j]):
+                        ax[-1].text(k, val, str(val), color='red', ha='right', va='bottom')
+                for j, val in enumerate(self.number):
+                    ax[-1].text(j, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
+                ax[-1].plot(range(len(self.number)), self.number, marker='o', color='blue')
+
+                ax[-1].set_title(f"Graph_Learner {i + 1}")
+                ax[-1].set_ylabel("Number")
+                ax[-1].set_xlabel("Step")
+
+
+            
+            # ax.clear()
+            # for i in range(len(self.temp_gen_seq)):
+            #     ax.plot(range(len(self.temp_gen_seq[i])), self.temp_gen_seq[i], linestyle=':', color='red',marker='o')
+            #     for j, val in enumerate(self.temp_gen_seq[i]):
+            #         ax.text(j, val, str(val), color='red', ha='right', va='bottom')
+            # for j, val in enumerate(self.number):
+            #     ax.text(j, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
+            # ax.plot(range(len(self.number)), self.number, marker='o', color='blue')
+                
+                
         
-            ax.set_title("Graph_Learner")
-            ax.set_ylabel("Number")
-            ax.set_xlabel("Step")
+            
 
             canvas = FigureCanvasTkAgg(fig, master=self.tab2)
             canvas.draw()
