@@ -149,24 +149,47 @@
 #     print("No edges were selected.")
 
 
-data = {
-    1: ((1, 2), (1, 2)),
-    2: ((2, 3), (2, 4)),
-    3: ((3, 4),),
-    4: ((4, 5), (4, 6)),
-    6: ((6, 8),)
-}
+# data = {
+#     1: ((1, 2), (1, 2)),
+#     2: ((2, 3), (2, 4)),
+#     3: ((3, 4),),
+#     4: ((4, 5), (4, 6)),
+#     6: ((6, 8),)
+# }
 
-# Initialize an empty list to store the connected sequence
-connected_sequence = []
+# # Initialize an empty list to store the connected sequence
+# connected_sequence = []
 
-# Iterate over the tuples in the dictionary and concatenate their elements
-for value in data.values():
-    for pair in set(value):
-        connected_sequence.extend(pair)
+# # Iterate over the tuples in the dictionary and concatenate their elements
+# for value in data.values():
+#     for pair in set(value):
+#         connected_sequence.extend(pair)
 
-print("Connected sequence:")
-print(connected_sequence)
+# print("Connected sequence:")
+# print(connected_sequence)
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+import matplotlib.pyplot as plt
+
+# Sample data
+x = [1, 2, 3, 4, 5]
+y = [2, 3, 5, 7, 11]
+
+# Plot
+plt.plot(range(len(y)), y)
+
+# Customize labels and title
+plt.xlabel('X-axis')
+plt.ylabel('Y-axis')
+plt.title('Sample Plot')
+
+# Show plot
+plt.show()
+
+
+    
 
 
 
