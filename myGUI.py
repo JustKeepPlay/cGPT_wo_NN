@@ -102,6 +102,7 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
         self.grid_columnconfigure(1, weight=3)
 
         self.saved_seq_generated_list = []
+        self.generated_widgets = {}
     
     def add_generated_seq(self, seq):
         self.saved_seq_generated_list.append(seq)
@@ -113,6 +114,27 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
         seq_list.grid(row=length, column=1, pady=(0, 5), sticky="we")
         seq_num = customtkinter.CTkLabel(seq_list, text=self.saved_seq_generated_list[-1], font=("Ariel", 20))
         seq_num.grid(row=0, column=0, sticky="we")
+
+        # Store the widgets in a dictionary for later destruction
+        self.generated_widgets[length] = (seq_no, seq_list, seq_num)
+
+    def destroy_generated_widgets(self):
+        for widgets in self.generated_widgets.values():
+            for widget in widgets:
+                widget.destroy()
+        # Clear the generated widgets dictionary after destruction
+        self.generated_widgets = {}
+
+class UserDecisionFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master, fg_color="grey30")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.create_frame()
+
+    def create_frame(self):
+        customtkinter.CTkLabel(self, text="Hello World").grid(row=0, column=0)
 
 class FactorSequenceFrame(customtkinter.CTkScrollableFrame):
     def __init__(self, master):
@@ -171,7 +193,7 @@ class BarChartFrame(customtkinter.CTkFrame):
         edge_weights = doc.edges_amount
         print(edge_weights)
         edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
-
+        print(edge)
         try:
             if tab_view.get_sort_state():
                 edges = [str(_) for _ in list(edge.keys())[-10:]]
@@ -237,10 +259,6 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_prediction_tab()
         self.create_evaluation_tab()
 
-        # doc.add_doc([1,2,3,4,5,6,7,8,9], 5)
-        # doc.add_doc([9,8,7,6,5,4,3,2,1], 6)
-        # doc.add_doc([1,3,5,7,9,11,13,15], 3)
-        # doc.add_doc([1,3], 5)
         self.set("Learning Tab")
 
         self.sort_desc = True
@@ -315,7 +333,7 @@ class MyTabView(customtkinter.CTkTabview):
         # Save all 10 sequences in a single text file inside "train_data" directory
         file_name = os.path.join(train_data_dir, "sequences.txt")
         
-        amount_of_seq = 25
+        amount_of_seq = 10
         with open(file_name, 'w') as file:
             for i in range(amount_of_seq):
                 sequence = self.generate_sequence()
@@ -412,7 +430,7 @@ class MyTabView(customtkinter.CTkTabview):
             try:
                 seq = [int(num) for num in seq_after_process.split(',')]
                 self.seq_list.append(seq)
-                history = random.randint(1, 100)
+                history = random.randint(1, 10)
                 amount = random.randint(1, 5)
                 self.number_seq_frame.add_num_seq(seq, history=history, amount=amount)
             except Exception as e:
@@ -465,11 +483,9 @@ class MyTabView(customtkinter.CTkTabview):
 
 # ---------------------
         
-        
     def create_prediction_tab(self):
         self.switch_var = customtkinter.StringVar(value="off")
-
-        self.tab2.grid_rowconfigure(1, weight=2)
+        self.tab2.grid_rowconfigure(1, weight=1)
         # self.tab2.grid_rowconfigure((2,3), weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
 
@@ -502,11 +518,18 @@ class MyTabView(customtkinter.CTkTabview):
         self.switch.grid(row=0, column=7, sticky="e")
 
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
-        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=2)
+        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+
+        self.user_decision_frame = UserDecisionFrame(self.tab2)
+        self.user_decision_frame.grid(row=2, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+
+        self.all_route_frame = customtkinter.CTkScrollableFrame(self.tab2)
+        self.all_route_frame.grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+        self.all_route_frame.grid_rowconfigure(0, weight=1)
+        self.all_route_frame.grid_columnconfigure(0, weight=1)
 
         self.user_interact_seq_frame = customtkinter.CTkFrame(self.tab2)
         self.user_interact_seq_frame.grid(row=2, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
-        self.tab2.grid_rowconfigure(2, weight=1)
         self.user_interact_seq_frame.grid_rowconfigure(0, weight=1)
         self.user_interact_seq_frame.grid_columnconfigure(0, weight=1)
 
@@ -587,12 +610,62 @@ class MyTabView(customtkinter.CTkTabview):
     #         print(e)
             
             
+    # def get_pred_num(self):
+    #     try:
+    #         self.temp_gen_seq = []
+    #         history = int(self.history_field.get())
+    #         self.number = [int(num) for num in self.number_field.get().split(',')]
+    #         generate = int(self.gen_field.get())
+            
+    #         for i in range(10):
+    #             gen_num = doc.gen_next_n(self.number.copy(), generate, history)
+    #             self.temp_gen_seq.append(gen_num)
+    #         self.temp_gen_seq = set(map(tuple,self.temp_gen_seq))
+    #         self.temp_gen_seq = list(map(list,self.temp_gen_seq))
+    #         print('the seq gen is : ',self.temp_gen_seq)
+
+    #         try:
+    #             self.pred_seq_frame.saved_seq_generated_list.clear()
+    #             # for key, value in doc.edges_amount.items():
+    #             #     self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+    #             for key, value in doc.edge_table.items():
+    #                 self.pred_seq_frame.add_generated_seq(f"{key}: {value}")
+    #         except Exception as e:
+    #             print("Seq list problem")
+
+    #         # Destroy the existing canvas if it exists
+    #         if hasattr(self, 'canvas'):
+    #             self.canvas.get_tk_widget().destroy()
+
+
+    #         fig = Figure(figsize=(5,4), dpi=100)
+    #         ax = fig.add_subplot(111)
+
+    #         ax.clear()
+    #         for i in range(len(self.temp_gen_seq)):
+    #             ax.plot(range(len(self.temp_gen_seq[i])), self.temp_gen_seq[i], linestyle=':', color='red',marker='o')
+    #             for j, val in enumerate(self.temp_gen_seq[i]):
+    #                 ax.text(j, val, str(val), color='red', ha='right', va='bottom')
+    #         for j, val in enumerate(self.number):
+    #             ax.text(j, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
+    #         ax.plot(range(len(self.number)), self.number, marker='o', color='blue')
+        
+    #         ax.set_title("Graph_Learner")
+    #         ax.set_ylabel("Number")
+    #         ax.set_xlabel("Step")
+
+    #         canvas = FigureCanvasTkAgg(fig, master=self.tab2)
+    #         canvas.draw()
+    #         canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+    #         # canvas.get_tk_widget().grid(row=2, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
+    #         # canvas.get_tk_widget().grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
+            
+    #     except Exception as e:
+    #         print(e)
+            
+            
     def get_pred_num(self):
         try:
-            history = int(self.history_field.get())
-            self.number = [int(num) for num in self.number_field.get().split(',')]
-            generate = int(self.gen_field.get())
-            
             # Destroy the existing canvas if it exists
             if hasattr(self, 'canvas'):
                 self.canvas.get_tk_widget().destroy()
@@ -600,7 +673,7 @@ class MyTabView(customtkinter.CTkTabview):
             fig, ax = plt.subplots(figsize=(5,4), dpi=100)
 
             self.temp_gen_seq = []
-            gen_num = doc.gen_next_n(self.number.copy(), generate, history)
+            gen_num = doc.gen_next_n(self.number.copy(), self.generate, self.history)
             self.temp_gen_seq.append(gen_num)
             self.temp_gen_seq = set(map(tuple,self.temp_gen_seq))
             self.temp_gen_seq = list(map(list,self.temp_gen_seq))
@@ -609,12 +682,12 @@ class MyTabView(customtkinter.CTkTabview):
             
             try:
                 for i in range(len(self.temp_gen_seq)):
-                    ax.plot(range(len(self.temp_gen_seq[i])), self.temp_gen_seq[i], linestyle=':', color='red',marker='o')
+                    ax.plot(range(1, len(self.temp_gen_seq[i]) + 1, 1), self.temp_gen_seq[i], linestyle=':', color='red',marker='o')
                     for k, val in enumerate(self.temp_gen_seq[i]):
-                        ax.text(k, val, str(val), color='red', ha='right', va='bottom')
+                        ax.text(k + 1, val, str(val), color='red', ha='right', va='bottom')
                 for i, val in enumerate(self.number):
-                    ax.text(i, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
-                ax.plot(range(len(self.number)), self.number, marker='o', color='blue')
+                    ax.text(i + 1, val, str(val), color='blue', ha='right', va='bottom')  # Display the value on each marker
+                ax.plot(range(1, len(self.number) + 1, 1), self.number, marker='o', color='blue')
             except Exception as e:
                 print(f"Error: {e}")
 
@@ -634,7 +707,7 @@ class MyTabView(customtkinter.CTkTabview):
 
             canvas = FigureCanvasTkAgg(fig, master=self.user_interact_seq_frame)
             canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, pady=(10, 0), sticky="nsew")
+            canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
             # canvas.get_tk_widget().grid(row=2, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
             # canvas.get_tk_widget().grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
             
@@ -642,7 +715,12 @@ class MyTabView(customtkinter.CTkTabview):
             print(e)
 
     def generate_all_possible_route(self):
+        self.history = int(self.history_field.get())
+        self.number = [int(num) for num in self.number_field.get().split(',')]
+        self.generate = int(self.gen_field.get())
+
         try:
+            self.pred_seq_frame.destroy_generated_widgets()
             self.pred_seq_frame.saved_seq_generated_list.clear()
 
             # Convert each sublist to a tuple and create a set to remove duplicates
@@ -651,37 +729,51 @@ class MyTabView(customtkinter.CTkTabview):
 
             # Convert unique sublists back to lists
             unique_sublists = [list(sublist) for sublist in unique_sublists]
+            generated_list = []
+
+            steps = len(self.number) + self.generate
             for seq in unique_sublists:
-                self.pred_seq_frame.add_generated_seq(str(seq))
+                if len(seq) >= steps:
+                    if all(num in seq for num in self.number):
+                        start_index = seq.index(self.number[0]) if self.number[0] in seq else -1
+                        if start_index != -1 and seq[start_index:start_index + len(self.number)] == self.number:
+                            generated_list.append(seq[start_index:])
+                            self.pred_seq_frame.add_generated_seq(str(generated_list[-1]))
         except Exception as e:
-            print("Seq list problem")
+            print(f"Seq list problem: {e}")
 
         # Destroy the existing canvas if it exists
         if hasattr(self, 'canvas'):
             self.canvas.get_tk_widget().destroy()
 
 
-        fig = Figure(figsize=(5,4), dpi=100)
+        fig = Figure(figsize=(6,4), dpi=100)
         ax = []
-        row = len(unique_sublists)
+        row = len(generated_list)
         column = 1
-        for irow, seq in enumerate(unique_sublists):
+        for irow, seq in enumerate(generated_list):
             print(f"{row},{column},{irow + 1}")
             ax.append(fig.add_subplot(row, column, irow + 1))
-            for i, value in enumerate(seq):
-                ax[-1].text(i, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
-            ax[-1].plot(range(len(seq)), seq, marker='o', color='blue')
+            # for i, value in enumerate(seq):
+            #     ax[-1].text(i, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+            # ax[-1].plot(range(len(seq)), seq, marker='o', color='blue')
+            
+            print(f"steps: {steps}")
+            if len(seq) >= steps:
+                for i in range(steps):
+                    ax[-1].text(i + 1, seq[i], str(seq[i]), color='blue', ha='right', va='bottom')  # Display the value on each marker
+                ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
                 
 
-            ax[-1].set_title(f"Graph_Learner {irow + 1}")
+            ax[-1].set_title(f"Graph_Learner {irow + 1}", loc='left')
             ax[-1].set_ylabel("Number")
             ax[-1].set_xlabel("Step")
 
-        canvas = FigureCanvasTkAgg(fig, master=self.tab2)
+        canvas = FigureCanvasTkAgg(fig, master=self.all_route_frame)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+        # canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+        canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew", ipady=len(generated_list) * 75)
 
-        self.tab2.grid_rowconfigure(1, weight=2)
 
     def generate_by_switch(self):
         self.generate_all_possible_route()

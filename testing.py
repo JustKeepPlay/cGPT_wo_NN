@@ -168,25 +168,28 @@
 # print("Connected sequence:")
 # print(connected_sequence)
 
-import networkx as nx
-import matplotlib.pyplot as plt
+def find_sequences_in_list(number, lst):
+    sequences = []
+    for sublist in lst:
+        if all(num in sublist for num in number):
+            indices = [sublist.index(num) for num in number]
+            if indices == list(range(min(indices), max(indices) + 1)):
+                sequences.append(sublist)
+    return sequences
 
-import matplotlib.pyplot as plt
+lst_data = [[1,2,3,4,5], [1,2,4,6,8], [1,3,5,7,9], [1,2,3,5,7,9,10]]
+number = [1, 2, 3]
 
-# Sample data
-x = [1, 2, 3, 4, 5]
-y = [2, 3, 5, 7, 11]
+sequences = find_sequences_in_list(number, lst_data)
 
-# Plot
-plt.plot(range(len(y)), y)
+if sequences:
+    print("Sequences", number, "are present in the list. Sequences:", sequences)
+else:
+    print("Sequences", number, "are not present in the list.")
 
-# Customize labels and title
-plt.xlabel('X-axis')
-plt.ylabel('Y-axis')
-plt.title('Sample Plot')
 
-# Show plot
-plt.show()
+
+
 
 
     
