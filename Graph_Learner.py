@@ -148,10 +148,7 @@ class Bloom_Filter:
     if self.bit_vector[self.k_all(seq)] == 0: return False
     return True
 
-class doc_graph:
-  def get_edge_table(self):
-    return self.edge_table
-  
+class doc_graph:  
   def __init__(self,h,gen_mode='max'):
     #Initiate graph, assigning generate mode
     self.h = h #Currently serves no purpose but can be adapted to serve as an h_max, the maximum h allowed during generation
@@ -281,7 +278,6 @@ class doc_graph:
       #and therefore has no associated edges.
     hseq = hash(seq)
     edges = self.check_seq(seq)
-    print(f"edges: {edges}")
     # print(f"After check_seq: {edges}")
     #get edges which have positive bloom filter responses for seq
     if len(edges) == 0:
@@ -292,6 +288,7 @@ class doc_graph:
         if len(edges) > 0: break
     if len(edges) == 1:
         #If only 1 edge has a positive filter response its associated word is predicted.
+      print(f"edges: {edges}")
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:
@@ -309,13 +306,17 @@ class doc_graph:
         prompt.append(edge[1])
 
       elif self.gen_mode == 'rand':
-        print("Mode: Random")
+        # print("Mode: Random")
         #Randomly select from the set of edges.
+        print(f"edges: {edges}")
         edge = random.choice(edges)
-        totalWeight = len(edges)
-        for e in set(edges):
-          print(f"{e}: {self.edges_amount[e] / totalWeight * 100}%")
+        # totalWeight = len(edges)
+        # for e in set(edges):
+        #   print(f"{e}: {self.edges_amount[e] / totalWeight * 100}%")
         prompt.append(edge[1])
+
+      elif self.gen_mode == 'get-all-seq':
+        ...
 
       elif self.gen_mode == 'wrand':
         #Randomly select edge based on the probability. 
