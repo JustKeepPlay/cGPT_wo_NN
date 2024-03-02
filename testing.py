@@ -168,24 +168,35 @@
 # print("Connected sequence:")
 # print(connected_sequence)
 
-def find_sequences_in_list(number, lst):
-    sequences = []
-    for sublist in lst:
-        if all(num in sublist for num in number):
-            indices = [sublist.index(num) for num in number]
-            if indices == list(range(min(indices), max(indices) + 1)):
-                sequences.append(sublist)
-    return sequences
+# def find_sequences_in_list(number, lst):
+#     sequences = []
+#     for sublist in lst:
+#         if all(num in sublist for num in number):
+#             indices = [sublist.index(num) for num in number]
+#             if indices == list(range(min(indices), max(indices) + 1)):
+#                 sequences.append(sublist)
+#     return sequences
 
-lst_data = [[1,2,3,4,5], [1,2,4,6,8], [1,3,5,7,9], [1,2,3,5,7,9,10]]
-number = [1, 2, 3]
+# lst_data = [[1,2,3,4,5], [1,2,4,6,8], [1,3,5,7,9], [1,2,3,5,7,9,10]]
+# number = [1, 2, 3]
 
-sequences = find_sequences_in_list(number, lst_data)
+# sequences = find_sequences_in_list(number, lst_data)
 
-if sequences:
-    print("Sequences", number, "are present in the list. Sequences:", sequences)
-else:
-    print("Sequences", number, "are not present in the list.")
+# if sequences:
+#     print("Sequences", number, "are present in the list. Sequences:", sequences)
+# else:
+#     print("Sequences", number, "are not present in the list.")
+
+import tkinter as tk
+root = tk.Tk()
+...
+var = tk.IntVar()
+button = tk.Button(root, text="Click Me", command=lambda: var.set(1))
+button.place(relx=.5, rely=.5, anchor="c")
+
+print("waiting...")
+button.wait_variable(var)
+print("done waiting.")
 
 
 
