@@ -9,6 +9,7 @@ from Graph_Learner import doc_graph
 import networkx as nx
 import ast, os, random
 import math
+import plotly.graph_objects as go
 
 doc = doc_graph(5, 'rand')
 
@@ -203,16 +204,14 @@ class BarChartFrame(customtkinter.CTkFrame):
 
     def draw_Bar_Chart(self):
         edge_weights = doc.edges_amount
-        print(edge_weights)
         edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
-        print(edge)
         try:
             if tab_view.get_sort_state():
-                edges = [str(_) for _ in list(edge.keys())[-10:]]
-                values = list(edge.values())[-10:]
+                edges = [str(_) for _ in list(edge.keys())[-20:]]
+                values = list(edge.values())[-20:]
             else:
-                edges = [str(_) for _ in list(edge.keys())[:10]]
-                values = list(edge.values())[:10]
+                edges = [str(_) for _ in list(edge.keys())[:20]]
+                values = list(edge.values())[:20]
         except Exception as e:
             print(e)
 
@@ -452,16 +451,12 @@ class MyTabView(customtkinter.CTkTabview):
                 count = int(self.number_seq_frame.count_labels[index].get("0.0", "end"))
                 history = int(self.number_seq_frame.seq_history[index].get("0.0", "end"))
 
-                print(f"{seq}: {history}")
                 for _ in range(count):
                     doc.add_doc(list(seq), history)
                 # doc.add_doc(list(seq), history, count)
             self.draw_graph()
             self.show_checkmark()
             self.create_network.configure(state="normal")
-            print(f"Node to edge table: {doc.node_to_edge_table}")
-            print(f"Edge table: {doc.edge_table}")
-            print(f"Edge to bfilter table: {doc.edge_to_bfilter_table}")
             print(self.seq_list)
         except Exception as e:
             print(e)
@@ -475,7 +470,8 @@ class MyTabView(customtkinter.CTkTabview):
         
     def create_prediction_tab(self):
         self.switch_var = customtkinter.StringVar(value="off")
-        self.tab2.grid_rowconfigure(1, weight=1)
+        self.tab2.grid_rowconfigure(1, weight=3)
+        self.tab2.grid_rowconfigure(2, weight=1)
         # self.tab2.grid_rowconfigure((2,3), weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
 
@@ -510,13 +506,14 @@ class MyTabView(customtkinter.CTkTabview):
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
         self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
 
+        self.all_route_frame = customtkinter.CTkScrollableFrame(self.tab2)
+        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+        self.all_route_frame.grid_rowconfigure(0, weight=1)
+        self.all_route_frame.grid_columnconfigure(0, weight=1)
+        
         self.user_decision_frame = UserDecisionFrame(self.tab2)
         self.user_decision_frame.grid(row=2, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
 
-        self.all_route_frame = customtkinter.CTkScrollableFrame(self.tab2)
-        self.all_route_frame.grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
-        self.all_route_frame.grid_rowconfigure(0, weight=1)
-        self.all_route_frame.grid_columnconfigure(0, weight=1)
 
         self.user_interact_seq_frame = customtkinter.CTkFrame(self.tab2)
         self.user_interact_seq_frame.grid(row=2, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
@@ -612,6 +609,9 @@ class MyTabView(customtkinter.CTkTabview):
             print(e)
             
     def get_pred_num(self):
+        self.history = int(self.history_field.get())
+        self.number = [int(num) for num in self.number_field.get().split(',')]
+        self.generate = int(self.gen_field.get())
         try:
             # Destroy the existing canvas if it exists
             if hasattr(self, 'canvas'):
@@ -657,18 +657,34 @@ class MyTabView(customtkinter.CTkTabview):
             canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
             # canvas.get_tk_widget().grid(row=2, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
             # canvas.get_tk_widget().grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
+
+            # fig = go.Figure(go.Scatter(
+            #     x = [step for step in range(1, len(self.temp_gen_seq[0]) + 1, 1)],
+            #     y = self.temp_gen_seq[0]
+            # ))
+
+            # fig.update_layout(
+            #     xaxis = dict(
+            #         tickmode = 'linear',
+            #         tick0 = 1,
+            #         dtick = 1
+            #     )
+            # )
+
+            # fig.show()
             
         except Exception as e:
             print(e)
 
     def generate_all_possible_route(self):
-        self.history = int(self.history_field.get())
-        self.number = [int(num) for num in self.number_field.get().split(',')]
-        self.generate = int(self.gen_field.get())
-
         try:
             self.pred_seq_frame.destroy_generated_widgets()
             self.pred_seq_frame.saved_seq_generated_list.clear()
+
+            unique_sublists = []
+
+            if unique_sublists:
+                unique_sublists.clear()
 
             # Convert each sublist to a tuple and create a set to remove duplicates
             unique_sublists = list(map(tuple, self.seq_list))
@@ -676,7 +692,11 @@ class MyTabView(customtkinter.CTkTabview):
 
             # Convert unique sublists back to lists
             unique_sublists = [list(sublist) for sublist in unique_sublists]
+
             generated_list = []
+
+            if generated_list:
+                generated_list.clear()
 
             steps = len(self.number) + self.generate
             for seq in unique_sublists:
@@ -686,12 +706,13 @@ class MyTabView(customtkinter.CTkTabview):
                         if start_index != -1 and seq[start_index:start_index + len(self.number)] == self.number:
                             generated_list.append(seq[start_index:])
                             self.pred_seq_frame.add_generated_seq(str(generated_list[-1]))
+                            
         except Exception as e:
             print(f"Seq list problem: {e}")
 
         # Destroy the existing canvas if it exists
-        if hasattr(self, 'canvas'):
-            self.canvas.get_tk_widget().destroy()
+        if hasattr(self.all_route_frame, 'canvas'):
+            self.all_route_frame.canvas.get_tk_widget().destroy()
 
 
         fig = Figure(figsize=(6,4), dpi=100)
@@ -705,11 +726,16 @@ class MyTabView(customtkinter.CTkTabview):
             #     ax[-1].text(i, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
             # ax[-1].plot(range(len(seq)), seq, marker='o', color='blue')
             
+            # print(f"steps: {steps}")
+            # if len(seq) >= steps:
+            #     for i in range(1, steps + 1, 1):
+            #         ax[-1].text(i, seq[i], str(seq[i]), color='blue', ha='right', va='bottom')  # Display the value on each marker
+            #     ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
+
             print(f"steps: {steps}")
-            if len(seq) >= steps:
-                for i in range(steps):
-                    ax[-1].text(i + 1, seq[i], str(seq[i]), color='blue', ha='right', va='bottom')  # Display the value on each marker
-                ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
+            for i in range(steps):
+                ax[-1].text(i + 1, seq[i], str(seq[i]), color='blue', ha='right', va='bottom')  # Display the value on each marker
+            ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
                 
 
             ax[-1].set_title(f"Graph_Learner {irow + 1}", loc='left')
@@ -723,10 +749,13 @@ class MyTabView(customtkinter.CTkTabview):
 
 
     def generate_by_switch(self):
-        self.generate_all_possible_route()
+        
         if self.switch_var.get() == "off":
+            print("off")
             self.get_pred_num()
+            self.generate_all_possible_route()
         else:
+            print("on")
             if self.temp_gen_seq:
                 self.get_pred_num()
                 self.draw_network_from_gen()
@@ -760,8 +789,8 @@ class MyTabView(customtkinter.CTkTabview):
         print(color_list)
 
         # Destroy the existing canvas if it exists
-        if hasattr(self, 'canvas'):
-            self.canvas.get_tk_widget().destroy()
+        if hasattr(self.all_route_frame, 'canvas'):
+            self.all_route_frame.canvas.get_tk_widget().destroy()
             
         # Draw the graph
         # pos = nx.kamada_kawai_layout(G)
@@ -772,9 +801,10 @@ class MyTabView(customtkinter.CTkTabview):
                 font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=0.7, ax=ax, connectionstyle="arc3,rad=0.1")
 
         # Draw the graph in a Tkinter canvas
-        canvas = FigureCanvasTkAgg(fig, master=self.tab2)
+        canvas = FigureCanvasTkAgg(fig, master=self.all_route_frame)
         canvas.draw()
-        canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+        # canvas.get_tk_widget().grid(row=1, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+        canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
 
 # --------------------------------------------------------------------------
 
