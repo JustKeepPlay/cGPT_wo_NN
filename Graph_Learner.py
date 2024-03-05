@@ -288,7 +288,6 @@ class doc_graph:
         if len(edges) > 0: break
     if len(edges) == 1:
         #If only 1 edge has a positive filter response its associated word is predicted.
-      print(f"edges: {edges}")
       prompt.append(edges[0][1])
       return prompt
     if len(edges) > 1:
@@ -308,15 +307,11 @@ class doc_graph:
       elif self.gen_mode == 'rand':
         # print("Mode: Random")
         #Randomly select from the set of edges.
-        print(f"edges: {edges}")
         edge = random.choice(edges)
         # totalWeight = len(edges)
         # for e in set(edges):
         #   print(f"{e}: {self.edges_amount[e] / totalWeight * 100}%")
         prompt.append(edge[1])
-
-      elif self.gen_mode == 'get-all-seq':
-        ...
 
       elif self.gen_mode == 'wrand':
         #Randomly select edge based on the probability. 

@@ -5,5 +5,34 @@
 {% block header %}Learning Header{% endblock %}
 
 {% block content %}
-    <h1>{{ page_title }} Page</h1>
+    <div class="learning-container grid-learning-container">
+        <div class="grid-item-1">
+            <button type="button">Upload File</button>
+            <p>Sequence:</p>
+            <form action="{{ url_for(add_seq_to_list) }}" name="add_seq_form" method="post">
+                <input type="text" name="input_seq" id="input_seq"> 
+                <button type="submit" onclick="add_seq()">Add</button>
+            </form>
+
+            <button type="button" onclick="clear_seq()">Clear</button>
+        </div>
+        <div class="grid-item-2">
+            2
+        </div>
+        <div class="grid-item-3">
+        </div>
+        
+        <script type="text/javascript">
+            $(document).ready(function(){
+            $("form[name='add_seq_form']").submit(function(event) {
+                event.preventDefault();
+                $.post("/learning/add_seq", $(this).serialize()).done(function(data) {
+                    $("#message").html(data.message);
+                }).fail(function() {
+                    $("#message").html("An error has occurred.");
+                });
+            });
+        });
+        </script>
+    </div>
 {% endblock %}

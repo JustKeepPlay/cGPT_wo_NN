@@ -187,16 +187,32 @@
 # else:
 #     print("Sequences", number, "are not present in the list.")
 
-import tkinter as tk
-root = tk.Tk()
-...
-var = tk.IntVar()
-button = tk.Button(root, text="Click Me", command=lambda: var.set(1))
-button.place(relx=.5, rely=.5, anchor="c")
 
-print("waiting...")
-button.wait_variable(var)
-print("done waiting.")
+import plotly.graph_objs as go
+from plotly.offline import plot
+
+# Create some sample data
+x_values = [1, 2, 3, 4, 5]
+y_values = [10, 15, 13, 17, 18]
+
+# Create a Plotly trace
+trace = go.Scatter(x=x_values, y=y_values, mode='lines', name='Sample Data')
+
+# Create a Plotly layout
+layout = go.Layout(title='Sample Plot', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
+
+# Create a Plotly figure
+fig = go.Figure(data=[trace], layout=layout)
+
+# Generate the HTML code for the plot
+plot_html = plot(fig, output_type='div', include_plotlyjs=False)
+
+
+
+
+
+
+
 
 
 
