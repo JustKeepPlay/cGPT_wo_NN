@@ -4,7 +4,7 @@ import customtkinter
 from tkinter import filedialog
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Graph_Learner import doc_graph
 import networkx as nx
 import ast, os, random
@@ -128,7 +128,7 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
 
 class UserDecisionFrame(customtkinter.CTkFrame):
     def __init__(self, master):
-        super().__init__(master, fg_color="grey30")
+        super().__init__(master, fg_color="grey30", height=200)
         self.grid_rowconfigure((0, 1), weight=1)
         self.grid_columnconfigure((0, 1), weight=1)
         self.var = tk.IntVar()
@@ -470,9 +470,7 @@ class MyTabView(customtkinter.CTkTabview):
         
     def create_prediction_tab(self):
         self.switch_var = customtkinter.StringVar(value="off")
-        self.tab2.grid_rowconfigure(1, weight=3)
-        self.tab2.grid_rowconfigure(2, weight=1)
-        # self.tab2.grid_rowconfigure((2,3), weight=1)
+        self.tab2.grid_rowconfigure(1, weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
 
         number_label = customtkinter.CTkLabel(self.tab2, text="Sequence: ")
@@ -504,21 +502,20 @@ class MyTabView(customtkinter.CTkTabview):
         self.switch.grid(row=0, column=7, sticky="e")
 
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
-        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+        self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=3)
 
         self.all_route_frame = customtkinter.CTkScrollableFrame(self.tab2)
-        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
+        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=2)
         self.all_route_frame.grid_rowconfigure(0, weight=1)
         self.all_route_frame.grid_columnconfigure(0, weight=1)
         
-        self.user_decision_frame = UserDecisionFrame(self.tab2)
-        self.user_decision_frame.grid(row=2, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4)
-
-
         self.user_interact_seq_frame = customtkinter.CTkFrame(self.tab2)
-        self.user_interact_seq_frame.grid(row=2, column=4, pady=(10, 0), sticky="nsew", columnspan=4)
+        self.user_interact_seq_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
         self.user_interact_seq_frame.grid_rowconfigure(0, weight=1)
         self.user_interact_seq_frame.grid_columnconfigure(0, weight=1)
+
+        self.user_decision_frame = UserDecisionFrame(self.tab2)
+        self.user_decision_frame.grid(row=3, column=0, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
 
         # factor_seq_frame = FactorSequenceFrame(self.tab2)
         # factor_seq_frame.grid(row=1, column=0, pady=(10, 0), sticky="nsew", columnspan=8)
@@ -732,15 +729,21 @@ class MyTabView(customtkinter.CTkTabview):
             #         ax[-1].text(i, seq[i], str(seq[i]), color='blue', ha='right', va='bottom')  # Display the value on each marker
             #     ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
 
-            print(f"steps: {steps}")
-            for i in range(steps):
-                ax[-1].text(i + 1, seq[i], str(seq[i]), color='blue', ha='right', va='bottom')  # Display the value on each marker
             ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
+
+            try:
+                for i, (step, value) in enumerate(zip(range(1, len(seq) + 1), seq)):
+                    ax[-1].text(step, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+            except Exception as e:
+                print(f"error: {e}")
                 
 
             ax[-1].set_title(f"Graph_Learner {irow + 1}", loc='left')
             ax[-1].set_ylabel("Number")
             ax[-1].set_xlabel("Step")
+
+        # Adjust spacing between subplots
+        fig.subplots_adjust(hspace=0.5) # Increase the vertical gap between subplots
 
         canvas = FigureCanvasTkAgg(fig, master=self.all_route_frame)
         canvas.draw()

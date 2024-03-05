@@ -6,4 +6,8 @@
 
 {% block content %}
     <h1>Hello, World! {{ page_title }} Page</h1>
+    <div id="plot_div">
+        <!-- Plot will be inserted here -->
+        {{ plot_html | safe }} <!-- Insert the plot HTML here -->
+    </div>
 {% endblock %}
