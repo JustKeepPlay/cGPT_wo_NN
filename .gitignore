@@ -1,6 +1,5 @@
 dev-env/
 .venv/
-app.py
 templates/
 static/
 testing.py
