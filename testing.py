@@ -188,24 +188,41 @@
 #     print("Sequences", number, "are not present in the list.")
 
 
-import plotly.graph_objs as go
-from plotly.offline import plot
+# import plotly.graph_objs as go
+# from plotly.offline import plot
 
-# Create some sample data
-x_values = [1, 2, 3, 4, 5]
-y_values = [10, 15, 13, 17, 18]
+# # Create some sample data
+# x_values = [1, 2, 3, 4, 5]
+# y_values = [10, 15, 13, 17, 18]
 
-# Create a Plotly trace
-trace = go.Scatter(x=x_values, y=y_values, mode='lines', name='Sample Data')
+# # Create a Plotly trace
+# trace = go.Scatter(x=x_values, y=y_values, mode='lines', name='Sample Data')
 
-# Create a Plotly layout
-layout = go.Layout(title='Sample Plot', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
+# # Create a Plotly layout
+# layout = go.Layout(title='Sample Plot', xaxis=dict(title='X-axis'), yaxis=dict(title='Y-axis'))
 
-# Create a Plotly figure
-fig = go.Figure(data=[trace], layout=layout)
+# # Create a Plotly figure
+# fig = go.Figure(data=[trace], layout=layout)
 
-# Generate the HTML code for the plot
-plot_html = plot(fig, output_type='div', include_plotlyjs=False)
+# # Generate the HTML code for the plot
+# plot_html = plot(fig, output_type='div', include_plotlyjs=False)
+
+def is_sequence_in_lists(sequence, lists):
+    for lst in lists:
+        if all(item in lst for item in sequence):
+            return lst
+    return None
+
+# Example usage:
+lists = [[1, 2, 3], [3, 4, 5, 6], [7, 8, 9]]
+sequence_to_find = [8,9]
+
+result = is_sequence_in_lists(sequence_to_find, lists)
+if result:
+    print("Sequence found in list:", result)
+else:
+    print("Sequence not found in lists.")
+
 
 
 
