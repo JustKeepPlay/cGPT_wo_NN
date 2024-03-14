@@ -320,8 +320,26 @@ class MyTabView(customtkinter.CTkTabview):
 
 
     def save_sequence(self):
-        print("Save Sequence Button clicked!")
-            
+        saved_sequences_dir = "Saved Sequences"
+        os.makedirs(saved_sequences_dir, exist_ok=True)
+        file_path = os.path.join(saved_sequences_dir, "Sequence_1.txt")
+        counter = 1
+        while True:
+            if not os.path.exists(file_path):
+                break
+            counter += 1
+            new_file_name = f"Sequence_{counter}.txt"
+            file_path = os.path.join(saved_sequences_dir, new_file_name)
+        try:
+            with open(file_path, 'x') as file:
+                checked_sequences = self.number_seq_frame.get_checklist()
+                for seq in checked_sequences:
+                    seq_str = ','.join(map(str, seq))
+                    file.write(seq_str + '#\n')
+            self.show_checkmark("List of sequences saved successfully.")
+        except Exception as e:
+            print(f"Error saving sequences: {e}")
+   
 
     def add_seq_enter(self, event):
         self.get_seq()
@@ -457,15 +475,15 @@ class MyTabView(customtkinter.CTkTabview):
                     doc.add_doc(list(seq), history)
                 # doc.add_doc(list(seq), history, count)
             self.draw_graph()
-            self.show_checkmark()
+            self.show_checkmark("Sequence train successfully.")
             self.create_network.configure(state="normal")
             print(self.seq_list)
         except Exception as e:
             print(e)
 
-    def show_checkmark(self):
+    def show_checkmark(self, msg):
         # Show some positive message with the checkmark icon
-        CTkMessagebox(header=True, title="Success", message="Sequence train successfully.",
+        CTkMessagebox(header=True, title="Success", message=msg,
                   icon="check", option_1="OK")
 
 # ---------------------
@@ -603,7 +621,7 @@ class MyTabView(customtkinter.CTkTabview):
                         self.number_field.insert(0, str(self.num[:-1])[1:-1])
                         self.gen_field.delete(0, 'end')
                         self.gen_field.insert(0, '1')
-                        self.show_checkmark()
+                        self.show_checkmark("Sequence train successfully.")
                     else:
                         ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
                         for i, value in enumerate(self.num):

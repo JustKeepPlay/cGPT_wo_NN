@@ -207,21 +207,44 @@
 # # Generate the HTML code for the plot
 # plot_html = plot(fig, output_type='div', include_plotlyjs=False)
 
-def is_sequence_in_lists(sequence, lists):
-    for lst in lists:
-        if all(item in lst for item in sequence):
-            return lst
-    return None
+# def is_sequence_in_lists(sequence, lists):
+#     for lst in lists:
+#         if all(item in lst for item in sequence):
+#             return lst
+#     return None
 
-# Example usage:
-lists = [[1, 2, 3], [3, 4, 5, 6], [7, 8, 9]]
-sequence_to_find = [8,9]
+# # Example usage:
+# lists = [[1, 2, 3], [3, 4, 5, 6], [7, 8, 9]]
+# sequence_to_find = [8,9]
 
-result = is_sequence_in_lists(sequence_to_find, lists)
-if result:
-    print("Sequence found in list:", result)
-else:
-    print("Sequence not found in lists.")
+# result = is_sequence_in_lists(sequence_to_find, lists)
+# if result:
+#     print("Sequence found in list:", result)
+# else:
+#     print("Sequence not found in lists.")
+
+import matplotlib.pyplot as plt
+
+def on_pick(event):
+    artist = event.artist
+    xmouse, ymouse = event.mouseevent.xdata, event.mouseevent.ydata
+    x, y = artist.get_xdata(), artist.get_ydata()
+    ind = event.ind
+    print('Artist picked:', event.artist)
+    print('{} vertices picked'.format(len(ind)))
+    print('Pick between vertices {} and {}'.format(min(ind), max(ind)+1))
+    print('x, y of mouse: {:.2f},{:.2f}'.format(xmouse, ymouse))
+    print('Data point:', x[ind[0]], y[ind[0]])
+    # print
+
+fig, ax = plt.subplots()
+
+tolerance = 10 # points
+ax.plot(range(10), 'ro-', picker=tolerance)
+
+fig.canvas.callbacks.connect('pick_event', on_pick)
+
+plt.show()
 
 
 

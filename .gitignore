@@ -4,6 +4,7 @@ templates/
 static/
 testing.py
 graph_testing.py
+Saved Sequences
 
 *.pyc
 __pycache__/
