@@ -477,7 +477,6 @@ class MyTabView(customtkinter.CTkTabview):
             self.draw_graph()
             self.show_checkmark("Sequence train successfully.")
             self.create_network.configure(state="normal")
-            print(self.seq_list)
         except Exception as e:
             print(e)
 
@@ -590,14 +589,14 @@ class MyTabView(customtkinter.CTkTabview):
                 
                 try:
                     # Draw all the plot as red
-                    ax.plot(range(1, len(self.gen_num) + 1, 1), self.gen_num, linestyle=':', color='red',marker='o')
+                    ax.plot(range(1, len(self.gen_num) + 1, 1), self.gen_num, linestyle=':', color='red',marker='o', markersize=10)
                     for i, value in enumerate(self.gen_num):
-                        ax.text(i + 1, value, str(value), color='red', ha='right', va='bottom')
+                        ax.text(i + 1, value + 0.1, str(value), color='red', ha='right', va='bottom')
 
                     # Draw the initial plot as blue
-                    ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
+                    ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', markersize=10, color='blue')
                     for i, value in enumerate(self.num):
-                        ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+                        ax.text(i + 1, value + 0.1, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
                 except Exception as e:
                     print(f"Error plotting graph: {e}")
 
@@ -611,9 +610,12 @@ class MyTabView(customtkinter.CTkTabview):
 
                 try:
                     self.num = self.gen_num[:-1]
+                    print(f"self.num: {self.num}")
                     self.num.extend([int(i) for i in self.user_decision_frame.gen_next.get().split(',')])
+                    print(f"self.num after extend: {self.num}")
 
                     if (not self.is_sequence_in_lists(self.num)):
+                        print(f"{self.num} not in learning")
                         doc.add_doc(self.num, self.history)
                         self.seq_list.append(self.num)
                         self.generate_all_possible_route()
@@ -623,6 +625,9 @@ class MyTabView(customtkinter.CTkTabview):
                         self.gen_field.insert(0, '1')
                         self.show_checkmark("Sequence train successfully.")
                     else:
+                        # Destroy the existing canvas if it exists
+                        if hasattr(self.user_interact_seq_frame, 'canvas'):
+                            self.user_interact_seq_frame.canvas.get_tk_widget().destroy()
                         ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
                         for i, value in enumerate(self.num):
                             ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
@@ -748,7 +753,7 @@ class MyTabView(customtkinter.CTkTabview):
         for irow, seq in enumerate(self.generated_list):
             ax.append(fig.add_subplot(row, column, irow + 1))
             try:
-                ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', color='blue')
+                ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', markersize=10, color='blue')
                 for i, (step, value) in enumerate(zip(range(1, len(seq) + 1), seq)):
                     ax[-1].text(step, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
             except Exception as e:
