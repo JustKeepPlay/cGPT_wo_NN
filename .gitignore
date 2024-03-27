@@ -5,6 +5,9 @@ static/
 testing.py
 graph_testing.py
 Saved Sequences
+Barchart Images
+Network Images
+.clj-kondo
 
 *.pyc
 __pycache__/

@@ -188,12 +188,12 @@ class NetworkFrame(customtkinter.CTkFrame):
             self.canvas.get_tk_widget().destroy()
 
         plt.close()
-        fig, ax = plt.subplots(figsize=(6, 4))
+        self.network_fig, ax = plt.subplots(figsize=(6, 4))
         nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
                 font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=1, ax=ax)
 
         # Draw the graph in a Tkinter canvas
-        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas = FigureCanvasTkAgg(self.network_fig, master=self)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.grid_rowconfigure(0, weight=1)
@@ -221,8 +221,8 @@ class BarChartFrame(customtkinter.CTkFrame):
         if hasattr(self, 'canvas'):
             self.canvas.get_tk_widget().destroy()
         
-        fig = Figure(figsize=(7, 5), dpi=100)
-        ax = fig.add_subplot(111)
+        self.bar_fig = Figure(figsize=(7, 5), dpi=100)
+        ax = self.bar_fig.add_subplot(111)
 
         ax.clear()
 
@@ -231,6 +231,7 @@ class BarChartFrame(customtkinter.CTkFrame):
         except Exception as e:
             print(e)
 
+
         # Adding labels and title
         ax.set_xlabel('Values')
         ax.set_ylabel('Edges')
@@ -238,7 +239,7 @@ class BarChartFrame(customtkinter.CTkFrame):
 
 
         # Draw the graph in a Tkinter canvas
-        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas = FigureCanvasTkAgg(self.bar_fig, master=self)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.grid_rowconfigure(0, weight=1)
@@ -311,9 +312,8 @@ class MyTabView(customtkinter.CTkTabview):
         self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.train_data)
         self.create_network.grid(row=3, column=2, padx=(0, 10), pady=(0, 10))
 
-
-        remove_seq_btn = customtkinter.CTkButton(self.tab1, text="Remove Sequence", fg_color="red", hover_color="darkred", command=self.remove_sequence)
-        remove_seq_btn.grid(row=6, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
+        # remove_seq_btn = customtkinter.CTkButton(self.tab1, text="Remove Sequence", fg_color="red", hover_color="darkred", command=self.remove_sequence)
+        # remove_seq_btn.grid(row=6, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
     def remove_sequence(self):
         print("Remove Sequence Button clicked!")
@@ -628,9 +628,10 @@ class MyTabView(customtkinter.CTkTabview):
                         # Destroy the existing canvas if it exists
                         if hasattr(self.user_interact_seq_frame, 'canvas'):
                             self.user_interact_seq_frame.canvas.get_tk_widget().destroy()
+
                         ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
                         for i, value in enumerate(self.num):
-                            ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+                            ax.text(i + 1, value + 0.1, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
 
                 except Exception as e:
                     print(f"Error get input from entry to num: {e}")
@@ -649,54 +650,50 @@ class MyTabView(customtkinter.CTkTabview):
 
             self.user_decision_frame.accept_btn.configure(state="disable")
             # Draw the initial plot as blue
-            self.done_gen()
+            self.show_checkmark("GraphLeaner successfully generated.")
         except Exception as e:
             print(e)
-
-    def done_gen(self):
-        # Show some positive message with the checkmark icon
-        CTkMessagebox(message="GraphLeaner successfully generated.", icon="check", option_1="OK")
             
-    def get_pred_num(self):
-        self.history = int(self.history_field.get())
-        self.number = [int(num) for num in self.number_field.get().split(',')]
-        self.generate = int(self.gen_field.get())
+    # def get_pred_num(self):
+    #     self.history = int(self.history_field.get())
+    #     self.number = [int(num) for num in self.number_field.get().split(',')]
+    #     self.generate = int(self.gen_field.get())
 
-        try:
-            # Destroy the existing canvas if it exists
-            if hasattr(self.user_interact_seq_frame, 'canvas'):
-                self.user_interact_seq_frame.canvas.get_tk_widget().destroy()
+    #     try:
+    #         # Destroy the existing canvas if it exists
+    #         if hasattr(self.user_interact_seq_frame, 'canvas'):
+    #             self.user_interact_seq_frame.canvas.get_tk_widget().destroy()
 
-            fig, ax = plt.subplots(figsize=(6,4), dpi=100)
+    #         fig, ax = plt.subplots(figsize=(6,4), dpi=100)
 
-            self.gen_num = []
-            self.gen_num = doc.gen_next_n(self.number.copy(), self.generate, self.history)
+    #         self.gen_num = []
+    #         self.gen_num = doc.gen_next_n(self.number.copy(), self.generate, self.history)
 
-            print('the seq gen is : ',self.gen_num)
+    #         print('the seq gen is : ',self.gen_num)
             
-            try:
-                # Draw all the plot as red
-                ax.plot(range(1, len(self.gen_num) + 1, 1), self.gen_num, linestyle=':', color='red',marker='o')
-                for i, value in enumerate(self.gen_num):
-                    ax.text(i + 1, value, str(value), color='red', ha='right', va='bottom')
+    #         try:
+    #             # Draw all the plot as red
+    #             ax.plot(range(1, len(self.gen_num) + 1, 1), self.gen_num, linestyle=':', color='red',marker='o')
+    #             for i, value in enumerate(self.gen_num):
+    #                 ax.text(i + 1, value, str(value), color='red', ha='right', va='bottom')
 
-                # Draw the initial plot as blue
-                ax.plot(range(1, len(self.number) + 1, 1), self.number, marker='o', color='blue')
-                for i, value in enumerate(self.number):
-                    ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
-            except Exception as e:
-                print(f"Error: {e}")
+    #             # Draw the initial plot as blue
+    #             ax.plot(range(1, len(self.number) + 1, 1), self.number, marker='o', color='blue')
+    #             for i, value in enumerate(self.number):
+    #                 ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+    #         except Exception as e:
+    #             print(f"Error: {e}")
 
-            ax.set_title(f"Graph_Learner")
-            ax.set_ylabel("Number")
-            ax.set_xlabel("Step")
+    #         ax.set_title(f"Graph_Learner")
+    #         ax.set_ylabel("Number")
+    #         ax.set_xlabel("Step")
 
-            canvas = FigureCanvasTkAgg(fig, master=self.user_interact_seq_frame)
-            self.user_interact_seq_frame.canvas = canvas
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
-        except Exception as e:
-            print(e)
+    #         canvas = FigureCanvasTkAgg(fig, master=self.user_interact_seq_frame)
+    #         self.user_interact_seq_frame.canvas = canvas
+    #         canvas.draw()
+    #         canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+    #     except Exception as e:
+    #         print(e)
 
     def generate_all_possible_route(self):
         try:
@@ -722,14 +719,6 @@ class MyTabView(customtkinter.CTkTabview):
 
             # steps = len(self.number) + self.generate
             steps = len(self.num) + 1
-            
-            # for seq in unique_sublists:
-            #     if len(seq) >= steps:
-            #         if all(num in seq for num in self.number):
-            #             start_index = seq.index(self.number[0]) if self.number[0] in seq else -1
-            #             if start_index != -1 and seq[start_index:start_index + len(self.number)] == self.number:
-            #                 self.generated_list.append(seq[start_index:])
-            #                 self.pred_seq_frame.add_generated_seq(str(self.generated_list[-1]))
 
             for seq in unique_sublists:
                 if len(seq) >= steps:
@@ -755,7 +744,7 @@ class MyTabView(customtkinter.CTkTabview):
             try:
                 ax[-1].plot(range(1, steps + 1, 1), seq[:steps], marker='o', markersize=10, color='blue')
                 for i, (step, value) in enumerate(zip(range(1, len(seq) + 1), seq)):
-                    ax[-1].text(step, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+                    ax[-1].text(step, value + 0.1, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
             except Exception as e:
                 print(f"error: {e}")
                 
@@ -873,6 +862,36 @@ class MyTabView(customtkinter.CTkTabview):
 
         self.sort_btn = customtkinter.CTkButton(self.tab3, text="Ascending", command=self.set_sort_state)
         self.sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+
+        customtkinter.CTkButton(
+            self.tab3, text="Save as image", 
+            fg_color="green", 
+            hover_color="darkgreen", 
+            command=lambda: self.save_image(self.network_frame.network_fig, "Network")
+        ).grid(row=2, column=0, padx=(0, 10), pady=(0, 10))
+
+        customtkinter.CTkButton(
+            self.tab3, text="Save as image", 
+            fg_color="green", hover_color="darkgreen", 
+            command=lambda: self.save_image(self.bar_chart_frame.bar_fig, "Barchart")
+        ).grid(row=2, column=1, padx=(0, 10), pady=(0, 10))
+
+    def save_image(self, fig, name):
+        saved_sequences_dir = name + " Images"
+        os.makedirs(saved_sequences_dir, exist_ok=True)
+        file_path = os.path.join(saved_sequences_dir, f"{name}_1.png")
+        counter = 1
+        while True:
+            if not os.path.exists(file_path):
+                break
+            counter += 1
+            new_file_name = f"{name}_{counter}.png"
+            file_path = os.path.join(saved_sequences_dir, new_file_name)
+        try:
+            fig.savefig(file_path)
+            self.show_checkmark(f"{name} image saved successfully.")
+        except Exception as e:
+            print(f"Error saving image: {e}")
 
     def evaluated(self):
         self.network_frame.draw_network()
