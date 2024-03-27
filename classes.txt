@@ -1,0 +1,91 @@
+NumberSequenceFrame
++seq_list: list
++count_labels: list
++seq_history: list
++checklists: list
++checked_checklists: list
++select_all()
++add_num_seq()
++get_checklist()
+
+PredictSequenceFrame
++saved_seq_generated_list: list
++generated_widgets: dict
++add_generated_seq()
++destroy_generated_widgets()
+
+UserDecisionFrame
++var: IntVar
++seq_gen: CTkEntry
++gen_next: CTkEntry
++accept_btn: CTkButton
+
+NetworkFrame
++network_fig: Figure
++draw_network()
+
+BarChartFrame
++bar_fig: Figure
++draw_Bar_Chart()
+
+MyTabView
++tab1: CTkFrame
++seq_list: list
++sort_desc: bool
++seq_entry: CTkEntry
++number_seq_frame: CTkFrame
++create_network: CTkButton
++tab2: CTkFrame
++switch_var: StringVar
++number_field: CTkEntry
++history_field: CTkEntry
++gen_field: CTkEntry
++switch: CTkSwitch
++pred_seq_frame: CTkFrame
++all_route_frame: CTkScrollableFrame
++gen_next_frame: CTkFrame
++user_decision_frame: CTkFrame
++history: int
++number: list
++generate: int
++num: list
++gen_num: list
++generated_list: list
++tab3: CTkFrame
++network_frame: CTkFrame
++bar_chart_frame: CTkFrame
++sort_btn: CTkButton
++create_learning_tab()
++save_sequence()
++add_seq_enter(event)
++generate_sequence()
++make_seq_file()
++clear_entry()
++draw_graph()
++process_sequences(input_values)
++show_error()
++isNumber(input_values)
++get_seq()
++get_seq_from_upload(content_before_hash)
++upload_file()
++train_data()
++show_checkmark(msg)
++create_prediction_tab()
++gen_seq_enter(event)
++is_sequence_in_lists(num_list)
++gen_next_by_one()
++generate_all_possible_route()
++generate_by_switch()
++draw_network_from_gen()
++create_evaluation_tab()
++save_image(fig, name)
++evaluate()
++isDesc()
++get_sort_state()
++set_sort_state()
+
+App
++create_theme_menubar()
++create_tab_view()
+
+
