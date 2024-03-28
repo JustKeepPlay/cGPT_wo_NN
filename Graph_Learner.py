@@ -255,7 +255,6 @@ class doc_graph:
     return prompt
 
   def gen_next(self,prompt,h):
-    print("gen_next")
     # print(f"Get Edge Table (1, 2): {self.edge_table[(1,2)]}")
     # print(f"Node to Edge Table: {self.node_to_edge_table}")
     # for item in self.node_to_edge_table:

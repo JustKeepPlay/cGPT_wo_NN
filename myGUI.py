@@ -1,7 +1,6 @@
-import tkinter as tk
 from CTkMessagebox import CTkMessagebox
-import customtkinter
-from tkinter import filedialog
+import customtkinter as ctk
+from customtkinter import filedialog
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -9,11 +8,11 @@ from Graph_Learner import doc_graph
 import networkx as nx
 import ast, os, random
 import math
-import plotly.graph_objects as go
+from CTkMenuBar import *
 
 doc = doc_graph(5, 'rand')
 
-class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
+class NumberSequenceFrame(ctk.CTkScrollableFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="grey30")
         self.seq_list = []
@@ -21,10 +20,8 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
         self.seq_history = []
         self.checklists = []
         self.checked_checklists = []
-        # self.seq_scroll_list = []
 
         self.grid_columnconfigure(0, weight=1)
-        # self.grid_columnconfigure(1, weight=1)
 
     def select_all(self):
         # Check if all checklists are currently selected
@@ -36,15 +33,6 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
                 checklist.deselect()
             else:
                 checklist.select()
-
-    # def remove_seq(self):
-    #     try:
-    #         checked_sequences = self.get_checklist()
-    #         for seq in checked_sequences:
-    #             if seq in 
-
-    #     except Exception as e:
-    #         print(e)
 
     def add_num_seq(self, seq, history=5, amount=1):
         if seq in self.seq_list:
@@ -65,20 +53,20 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
             self.grid_columnconfigure(0, weight=2)
             self.grid_columnconfigure((1,2), weight=1)
 
-            seq_scroll = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
+            seq_scroll = ctk.CTkScrollableFrame(self, orientation="horizontal", height=25)
             seq_scroll.grid(row=length, column=0, padx=(0, 5), pady=(0, 5), sticky="nsew")
 
-            checkbox = customtkinter.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
+            checkbox = ctk.CTkCheckBox(seq_scroll, text=str(tuple(seq)), font=("Ariel", 20))
             checkbox.select()
             checkbox.grid(row=0, column=0, sticky="ew")
             self.checklists.append(checkbox)
 
-            history_field = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
+            history_field = ctk.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
             history_field.grid(row=length, column=1, padx=(0, 5), pady=(0, 5), sticky="nsew")
             history_field.insert("0.0", str(history))
             self.seq_history.append(history_field)
 
-            count_label = customtkinter.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
+            count_label = ctk.CTkTextbox(self, width=110, height=10, font=("Ariel", 30), activate_scrollbars=False)
             count_label.grid(row=length, column=2, padx=(0, 5), pady=(0, 5), sticky="nsew")
             count_label.insert("0.0", str(amount))
             self.count_labels.append(count_label)  # Added count_label to count_labels list
@@ -88,7 +76,6 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
 
         for checklist in self.checklists:
             if checklist.get() == 1:
-                # print(checklist.cget("text"), " Type: ", type(checklist.cget("text")))
                 try:
                     self.checked_checklists.append(ast.literal_eval(checklist.cget("text")))
                 except:
@@ -96,7 +83,7 @@ class NumberSequenceFrame(customtkinter.CTkScrollableFrame):
         return self.checked_checklists
         
     
-class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
+class PredictSequenceFrame(ctk.CTkScrollableFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="grey30")
         self.grid_columnconfigure(0, weight=1)
@@ -109,11 +96,11 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
         self.saved_seq_generated_list.append(seq)
         length = len(self.saved_seq_generated_list) - 1
 
-        seq_no = customtkinter.CTkLabel(self, text=str(length+1), font=("Ariel", 30))
+        seq_no = ctk.CTkLabel(self, text=str(length+1), font=("Ariel", 30))
         seq_no.grid(row=length, column=0, sticky="we")
-        seq_list = customtkinter.CTkScrollableFrame(self, orientation="horizontal", height=25)
+        seq_list = ctk.CTkScrollableFrame(self, orientation="horizontal", height=25)
         seq_list.grid(row=length, column=1, pady=(0, 5), sticky="we")
-        seq_num = customtkinter.CTkLabel(seq_list, text=self.saved_seq_generated_list[-1], font=("Ariel", 20))
+        seq_num = ctk.CTkLabel(seq_list, text=self.saved_seq_generated_list[-1], font=("Ariel", 20))
         seq_num.grid(row=0, column=0, sticky="we")
 
         # Store the widgets in a dictionary for later destruction
@@ -126,41 +113,28 @@ class PredictSequenceFrame(customtkinter.CTkScrollableFrame):
         # Clear the generated widgets dictionary after destruction
         self.generated_widgets = {}
 
-class UserDecisionFrame(customtkinter.CTkFrame):
+class UserDecisionFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="grey30", height=200)
         self.grid_rowconfigure((0, 1), weight=1)
-        self.grid_columnconfigure((0, 1), weight=1)
-        self.var = tk.IntVar()
+        self.grid_columnconfigure(0, weight=1)
+        self.var = ctk.IntVar()
 
         self.create_frame()
 
     def create_frame(self):
         # All generated sequence
-        self.seq_gen = customtkinter.CTkEntry(self, font=("Ariel", 20))
+        self.seq_gen = ctk.CTkEntry(self, font=("Ariel", 20))
         self.seq_gen.grid(row=0, column=0, padx=10, pady=10, sticky="nsew", columnspan=2)
 
         # To generate next
-        self.gen_next = customtkinter.CTkEntry(self, font=("Ariel", 20))
+        self.gen_next = ctk.CTkEntry(self, font=("Ariel", 20))
         self.gen_next.grid(row=1, column=0, padx=10, pady=10, sticky="nsew", columnspan=2)
 
-        self.accept_btn = customtkinter.CTkButton(self, text="Accept", command=lambda: self.var.set(1))
-        self.accept_btn.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        self.accept_btn = ctk.CTkButton(self, text="Accept", command=lambda: self.var.set(1))
+        self.accept_btn.grid(row=2, column=0, padx=10, pady=10)
 
-        self.ignored_btn = customtkinter.CTkButton(self, text="Edit")
-        self.ignored_btn.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
-
-
-class FactorSequenceFrame(customtkinter.CTkScrollableFrame):
-    def __init__(self, master):
-        super().__init__(master, fg_color="lightgreen")
-
-
-class MainSequenceFrame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master, fg_color="grey30")
-
-class NetworkFrame(customtkinter.CTkFrame):
+class NetworkFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="grey30")
         
@@ -188,19 +162,19 @@ class NetworkFrame(customtkinter.CTkFrame):
             self.canvas.get_tk_widget().destroy()
 
         plt.close()
-        fig, ax = plt.subplots(figsize=(6, 4))
+        self.network_fig, ax = plt.subplots(figsize=(6, 4))
         nx.draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color="skyblue",
                 font_color="black", font_size=10, edge_color="gray", linewidths=1, alpha=1, ax=ax)
 
         # Draw the graph in a Tkinter canvas
-        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas = FigureCanvasTkAgg(self.network_fig, master=self)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
 
-class BarChartFrame(customtkinter.CTkFrame):
+class BarChartFrame(ctk.CTkFrame):
     def __init__(self, master):
         super().__init__(master, fg_color="grey30")
 
@@ -221,8 +195,8 @@ class BarChartFrame(customtkinter.CTkFrame):
         if hasattr(self, 'canvas'):
             self.canvas.get_tk_widget().destroy()
         
-        fig = Figure(figsize=(7, 5), dpi=100)
-        ax = fig.add_subplot(111)
+        self.bar_fig = Figure(figsize=(7, 5), dpi=100)
+        ax = self.bar_fig.add_subplot(111)
 
         ax.clear()
 
@@ -231,37 +205,38 @@ class BarChartFrame(customtkinter.CTkFrame):
         except Exception as e:
             print(e)
 
+
         # Adding labels and title
-        ax.set_xlabel('Values')
-        ax.set_ylabel('Edges')
-        ax.set_title('Horizontal Bar Chart')
+        ax.set_xlabel('Weight')
+        ax.set_ylabel('Edge')
+        ax.set_title('Edges Frequency')
 
 
         # Draw the graph in a Tkinter canvas
-        canvas = FigureCanvasTkAgg(fig, master=self)
+        canvas = FigureCanvasTkAgg(self.bar_fig, master=self)
         canvas.draw()
         canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
 
-class F1Frame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master, fg_color="lightgreen")
-        self.grid_columnconfigure(0, weight=1)
-        customtkinter.CTkLabel(self, text="F1", text_color="black").grid(row=0, column=0)
+# class F1Frame(ctk.CTkFrame):
+#     def __init__(self, master):
+#         super().__init__(master, fg_color="lightgreen")
+#         self.grid_columnconfigure(0, weight=1)
+#         ctk.CTkLabel(self, text="F1", text_color="black").grid(row=0, column=0)
 
-class ErrorRateFrame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master, fg_color="orange")
-        self.grid_columnconfigure(0, weight=1)
-        customtkinter.CTkLabel(self, text="Error Rate Frame", text_color="black").grid(row=0, column=0)
+# class ErrorRateFrame(ctk.CTkFrame):
+#     def __init__(self, master):
+#         super().__init__(master, fg_color="orange")
+#         self.grid_columnconfigure(0, weight=1)
+#         ctk.CTkLabel(self, text="Error Rate Frame", text_color="black").grid(row=0, column=0)
         
 
-class MyTabView(customtkinter.CTkTabview):
+class MyTabView(ctk.CTkTabview):
 
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, segmented_button_unselected_color="grey30", segmented_button_fg_color="grey30")
         self.tab1 = self.add("Learning Tab")
         self.tab2 = self.add("Prediction Tab")
         self.tab3 = self.add("Evaluation Tab")
@@ -277,47 +252,39 @@ class MyTabView(customtkinter.CTkTabview):
         self.sort_desc = True
 
     def create_learning_tab(self):
-        upload_btn = customtkinter.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
+        upload_btn = ctk.CTkButton(self.tab1, text="Upload File", command=self.upload_file)
         upload_btn.grid(row=0, column=0, pady=(0, 10), sticky="w")
 
-        self.seq_entry = customtkinter.CTkEntry(self.tab1)
+        self.seq_entry = ctk.CTkEntry(self.tab1)
         self.seq_entry.grid(row=1, column=0, padx=(0, 10), pady=(0, 10), ipadx=100)
         self.seq_entry.insert(0, "1,2,3,4,5")
         self.seq_entry.bind("<Return>", self.add_seq_enter)
 
-        add_seq_btn = customtkinter.CTkButton(self.tab1, text="Add", width=30, command=self.get_seq)
+        add_seq_btn = ctk.CTkButton(self.tab1, text="Add", width=30, command=self.get_seq)
         add_seq_btn.grid(row=1, column=1, padx=(0, 10), pady=(0, 10), sticky="w")
 
-        clear_entry_btn = customtkinter.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
+        clear_entry_btn = ctk.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
         clear_entry_btn.grid(row=1, column=2, pady=(0, 10), sticky="w")
 
-        save_seq_btn = customtkinter.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
+        save_seq_btn = ctk.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
         save_seq_btn.grid(row=2, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
-        # self.train_btn = customtkinter.CTkButton(self.tab1, text="Train Data from checklist", command=self.train_data)
+        # self.train_btn = ctk.CTkButton(self.tab1, text="Train Data from checklist", command=self.train_data)
         # self.train_btn.grid(row=5, column=2, pady=(0, 10), sticky="e")
 
         self.number_seq_frame = NumberSequenceFrame(self.tab1)
         self.number_seq_frame.grid(row=5, column=0, pady=(0, 10), sticky="nsew", columnspan=3)
         self.tab1.grid_rowconfigure(5, weight=1) # Expand an entire of row 3 to fit the window
 
-        customtkinter.CTkLabel(self.tab1, text="History", font=("Ariel", 20)).grid(row=4, column=0, sticky="e")
-        customtkinter.CTkLabel(self.tab1, text="Amount", font=("Ariel", 20)).grid(row=4, column=2)
+        ctk.CTkLabel(self.tab1, text="History", font=("Ariel", 20)).grid(row=4, column=0, sticky="e")
+        ctk.CTkLabel(self.tab1, text="Amount", font=("Ariel", 20)).grid(row=4, column=2)
 
-        select_all_cb = customtkinter.CTkCheckBox(self.tab1, text="Select All", font=("Ariel", 20), command=self.number_seq_frame.select_all)
+        select_all_cb = ctk.CTkCheckBox(self.tab1, text="Select All", font=("Ariel", 20), command=self.number_seq_frame.select_all)
         select_all_cb.select()
         select_all_cb.grid(row=3, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
-        self.create_network = customtkinter.CTkButton(self.tab1, text="Create Network", command=self.train_data)
+        self.create_network = ctk.CTkButton(self.tab1, text="Create Network", command=self.train_data)
         self.create_network.grid(row=3, column=2, padx=(0, 10), pady=(0, 10))
-
-
-        remove_seq_btn = customtkinter.CTkButton(self.tab1, text="Remove Sequence", fg_color="red", hover_color="darkred", command=self.remove_sequence)
-        remove_seq_btn.grid(row=6, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
-
-    def remove_sequence(self):
-        print("Remove Sequence Button clicked!")
-
 
     def save_sequence(self):
         saved_sequences_dir = "Saved Sequences"
@@ -373,7 +340,7 @@ class MyTabView(customtkinter.CTkTabview):
         print(f"All sequences saved in {file_name}")
 
     def clear_entry(self):
-        self.seq_entry.delete(0, tk.END)
+        self.seq_entry.delete(0, ctk.END)
 
     def draw_graph(self):
         # Create a graph
@@ -477,7 +444,6 @@ class MyTabView(customtkinter.CTkTabview):
             self.draw_graph()
             self.show_checkmark("Sequence train successfully.")
             self.create_network.configure(state="normal")
-            print(self.seq_list)
         except Exception as e:
             print(e)
 
@@ -489,50 +455,50 @@ class MyTabView(customtkinter.CTkTabview):
 # ---------------------
         
     def create_prediction_tab(self):
-        self.switch_var = customtkinter.StringVar(value="off")
+        self.switch_var = ctk.StringVar(value="off")
         self.tab2.grid_rowconfigure(1, weight=1)
         self.tab2.grid_columnconfigure(7, weight=1)
 
-        number_label = customtkinter.CTkLabel(self.tab2, text="Sequence: ")
+        number_label = ctk.CTkLabel(self.tab2, text="Sequence: ")
         number_label.grid(row=0, column=0, padx=(0, 10))
-        self.number_field = customtkinter.CTkEntry(self.tab2)
+        self.number_field = ctk.CTkEntry(self.tab2)
         self.number_field.grid(row=0, column=1, padx=(0, 10), ipadx=20)
         self.number_field.insert(0, "1,2")
         self.number_field.bind("<Return>", self.gen_seq_enter)
 
-        history_label = customtkinter.CTkLabel(self.tab2, text="History: ")
+        history_label = ctk.CTkLabel(self.tab2, text="History: ")
         history_label.grid(row=0, column=2, padx=(0, 10))
-        self.history_field = customtkinter.CTkEntry(self.tab2)
+        self.history_field = ctk.CTkEntry(self.tab2)
         self.history_field.grid(row=0, column=3, padx=(0, 10), ipadx=20)
         self.history_field.insert(0, "5")
         self.history_field.bind("<Return>", self.gen_seq_enter)
 
-        gen_label = customtkinter.CTkLabel(self.tab2, text="Generation Amount: ")
+        gen_label = ctk.CTkLabel(self.tab2, text="Generation Amount: ")
         gen_label.grid(row=0, column=4, padx=(0, 10))
-        self.gen_field = customtkinter.CTkEntry(self.tab2)
+        self.gen_field = ctk.CTkEntry(self.tab2)
         self.gen_field.grid(row=0, column=5, padx=(0, 10), ipadx=20)
         self.gen_field.insert(0, "3")
         self.gen_field.bind("<Return>", self.gen_seq_enter)
 
-        gen_btn = customtkinter.CTkButton(self.tab2, text="Generate", command=self.generate_by_switch)
+        gen_btn = ctk.CTkButton(self.tab2, text="Generate", command=self.generate_by_switch)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
 
-        self.switch = customtkinter.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.generate_by_switch,
+        self.switch = ctk.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.generate_by_switch,
                                         variable=self.switch_var, onvalue="on", offvalue="off")
         self.switch.grid(row=0, column=7, sticky="e")
 
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
         self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=3)
 
-        self.all_route_frame = customtkinter.CTkScrollableFrame(self.tab2)
-        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=2)
+        self.all_route_frame = ctk.CTkScrollableFrame(self.tab2)
+        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), ipady=500, sticky="nsew", columnspan=4, rowspan=2)
         self.all_route_frame.grid_rowconfigure(0, weight=1)
         self.all_route_frame.grid_columnconfigure(0, weight=1)
         
-        self.user_interact_seq_frame = customtkinter.CTkFrame(self.tab2)
-        self.user_interact_seq_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
-        self.user_interact_seq_frame.grid_rowconfigure(0, weight=1)
-        self.user_interact_seq_frame.grid_columnconfigure(0, weight=1)
+        self.gen_next_frame = ctk.CTkFrame(self.tab2)
+        self.gen_next_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
+        self.gen_next_frame.grid_rowconfigure(0, weight=1)
+        self.gen_next_frame.grid_columnconfigure(0, weight=1)
 
         self.user_decision_frame = UserDecisionFrame(self.tab2)
         self.user_decision_frame.grid(row=3, column=0, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
@@ -550,9 +516,12 @@ class MyTabView(customtkinter.CTkTabview):
             print(e)
 
     def is_sequence_in_lists(self, num_list):
+        print(f"Check if in list: {num_list}")
         for lst in self.generated_list:
             if all(item in lst for item in num_list):
+                print("Sequence exists")
                 return True
+        print("Sequence does not exists")
         return False
 
     def gen_next_by_one(self):
@@ -570,8 +539,8 @@ class MyTabView(customtkinter.CTkTabview):
             self.user_decision_frame.accept_btn.configure(state="normal")
             for i in range(step):
                 # Destroy the existing canvas if it exists
-                if hasattr(self.user_interact_seq_frame, 'canvas'):
-                    self.user_interact_seq_frame.canvas.get_tk_widget().destroy()
+                if hasattr(self.gen_next_frame, 'canvas'):
+                    self.gen_next_frame.canvas.get_tk_widget().destroy()
 
                 self.gen_num = doc.gen_next(self.num.copy(), self.history)
                 print('the seq gen is : ',self.gen_num)
@@ -601,8 +570,8 @@ class MyTabView(customtkinter.CTkTabview):
                 except Exception as e:
                     print(f"Error plotting graph: {e}")
 
-                canvas = FigureCanvasTkAgg(fig, master=self.user_interact_seq_frame)
-                self.user_interact_seq_frame.canvas = canvas
+                canvas = FigureCanvasTkAgg(fig, master=self.gen_next_frame)
+                self.gen_next_frame.canvas = canvas
                 canvas.draw()
                 canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
 
@@ -611,21 +580,29 @@ class MyTabView(customtkinter.CTkTabview):
 
                 try:
                     self.num = self.gen_num[:-1]
+                    print(f"self.num: {self.num}")
                     self.num.extend([int(i) for i in self.user_decision_frame.gen_next.get().split(',')])
+                    print(f"self.num after extend: {self.num}")
 
                     if (not self.is_sequence_in_lists(self.num)):
+                        print(f"{self.num} not in learning")
                         doc.add_doc(self.num, self.history)
                         self.seq_list.append(self.num)
                         self.generate_all_possible_route()
-                        self.number_field.delete(0, 'end')
-                        self.number_field.insert(0, str(self.num[:-1])[1:-1])
-                        self.gen_field.delete(0, 'end')
-                        self.gen_field.insert(0, '1')
                         self.show_checkmark("Sequence train successfully.")
                     else:
+                        # Destroy the existing canvas if it exists
+                        if hasattr(self.gen_next_frame, 'canvas'):
+                            self.gen_next_frame.canvas.get_tk_widget().destroy()
+                        
                         ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
                         for i, value in enumerate(self.num):
                             ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
+
+                        canvas = FigureCanvasTkAgg(fig, master=self.gen_next_frame)
+                        self.gen_next_frame.canvas = canvas
+                        canvas.draw()
+                        canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
 
                 except Exception as e:
                     print(f"Error get input from entry to num: {e}")
@@ -644,52 +621,7 @@ class MyTabView(customtkinter.CTkTabview):
 
             self.user_decision_frame.accept_btn.configure(state="disable")
             # Draw the initial plot as blue
-            self.done_gen()
-        except Exception as e:
-            print(e)
-
-    def done_gen(self):
-        # Show some positive message with the checkmark icon
-        CTkMessagebox(message="GraphLeaner successfully generated.", icon="check", option_1="OK")
-            
-    def get_pred_num(self):
-        self.history = int(self.history_field.get())
-        self.number = [int(num) for num in self.number_field.get().split(',')]
-        self.generate = int(self.gen_field.get())
-
-        try:
-            # Destroy the existing canvas if it exists
-            if hasattr(self.user_interact_seq_frame, 'canvas'):
-                self.user_interact_seq_frame.canvas.get_tk_widget().destroy()
-
-            fig, ax = plt.subplots(figsize=(6,4), dpi=100)
-
-            self.gen_num = []
-            self.gen_num = doc.gen_next_n(self.number.copy(), self.generate, self.history)
-
-            print('the seq gen is : ',self.gen_num)
-            
-            try:
-                # Draw all the plot as red
-                ax.plot(range(1, len(self.gen_num) + 1, 1), self.gen_num, linestyle=':', color='red',marker='o')
-                for i, value in enumerate(self.gen_num):
-                    ax.text(i + 1, value, str(value), color='red', ha='right', va='bottom')
-
-                # Draw the initial plot as blue
-                ax.plot(range(1, len(self.number) + 1, 1), self.number, marker='o', color='blue')
-                for i, value in enumerate(self.number):
-                    ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
-            except Exception as e:
-                print(f"Error: {e}")
-
-            ax.set_title(f"Graph_Learner")
-            ax.set_ylabel("Number")
-            ax.set_xlabel("Step")
-
-            canvas = FigureCanvasTkAgg(fig, master=self.user_interact_seq_frame)
-            self.user_interact_seq_frame.canvas = canvas
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+            self.show_checkmark("GraphLeaner successfully generated.")
         except Exception as e:
             print(e)
 
@@ -717,14 +649,6 @@ class MyTabView(customtkinter.CTkTabview):
 
             # steps = len(self.number) + self.generate
             steps = len(self.num) + 1
-            
-            # for seq in unique_sublists:
-            #     if len(seq) >= steps:
-            #         if all(num in seq for num in self.number):
-            #             start_index = seq.index(self.number[0]) if self.number[0] in seq else -1
-            #             if start_index != -1 and seq[start_index:start_index + len(self.number)] == self.number:
-            #                 self.generated_list.append(seq[start_index:])
-            #                 self.pred_seq_frame.add_generated_seq(str(self.generated_list[-1]))
 
             for seq in unique_sublists:
                 if len(seq) >= steps:
@@ -797,11 +721,6 @@ class MyTabView(customtkinter.CTkTabview):
             else:
                 self.draw_network_from_gen()
 
-
-    def list_all_seq(self):
-        for seq in self.seq_list:
-            self.pred_seq_frame.add_generated_seq(seq)
-
     def draw_network_from_gen(self):
         # Create a graph
         G = nx.DiGraph()
@@ -863,13 +782,43 @@ class MyTabView(customtkinter.CTkTabview):
         # self.error_rate_frame = ErrorRateFrame(self.tab3)
         # self.error_rate_frame.grid(row=2, column=1, padx=10, pady=10, sticky="nsew")
 
-        eva_btn = customtkinter.CTkButton(self.tab3, text="Evaluate", command=self.evaluated)
+        eva_btn = ctk.CTkButton(self.tab3, text="Evaluate", command=self.evaluate)
         eva_btn.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
 
-        self.sort_btn = customtkinter.CTkButton(self.tab3, text="Ascending", command=self.set_sort_state)
+        self.sort_btn = ctk.CTkButton(self.tab3, text="Ascending", command=self.set_sort_state)
         self.sort_btn.grid(row=0, column=1, padx=10, pady=10, sticky="e")
 
-    def evaluated(self):
+        ctk.CTkButton(
+            self.tab3, text="Save as image", 
+            fg_color="green", 
+            hover_color="darkgreen", 
+            command=lambda: self.save_image(self.network_frame.network_fig, "Network")
+        ).grid(row=2, column=0, padx=(0, 10), pady=(0, 10))
+
+        ctk.CTkButton(
+            self.tab3, text="Save as image", 
+            fg_color="green", hover_color="darkgreen", 
+            command=lambda: self.save_image(self.bar_chart_frame.bar_fig, "Barchart")
+        ).grid(row=2, column=1, padx=(0, 10), pady=(0, 10))
+
+    def save_image(self, fig, name):
+        saved_sequences_dir = name + " Images"
+        os.makedirs(saved_sequences_dir, exist_ok=True)
+        file_path = os.path.join(saved_sequences_dir, f"{name}_1.png")
+        counter = 1
+        while True:
+            if not os.path.exists(file_path):
+                break
+            counter += 1
+            new_file_name = f"{name}_{counter}.png"
+            file_path = os.path.join(saved_sequences_dir, new_file_name)
+        try:
+            fig.savefig(file_path)
+            self.show_checkmark(f"{name} image saved successfully.")
+        except Exception as e:
+            print(f"Error saving image: {e}")
+
+    def evaluate(self):
         self.network_frame.draw_network()
         self.bar_chart_frame.draw_Bar_Chart()
 
@@ -889,20 +838,45 @@ class MyTabView(customtkinter.CTkTabview):
         self.bar_chart_frame.draw_Bar_Chart()
         self.network_frame.draw_network()
 
-    
-class App(customtkinter.CTk):
+def change_theme(theme):
+    ctk.set_appearance_mode(theme)
 
+    if (ctk.get_appearance_mode() == "Dark"):
+        color = "grey30"
+    else:
+        color="grey70"
+
+    tab_view.number_seq_frame.configure(fg_color=color)
+    tab_view.pred_seq_frame.configure(fg_color=color)
+    tab_view.user_decision_frame.configure(fg_color=color)
+    tab_view.network_frame.configure(fg_color=color)
+    tab_view.bar_chart_frame.configure(fg_color=color)
+
+class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Graph Learner GUI")
         self.geometry("1920x1080")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        customtkinter.set_appearance_mode("dark")
+        ctk.set_appearance_mode("system")
+        ctk.set_default_color_theme("dark-blue")
 
+        self.create_theme_menubar()
+        self.create_tab_view()
+
+    def create_theme_menubar(self):
+        menubar = CTkMenuBar(self)
+        theme_btn = menubar.add_cascade("Theme")
+
+        theme_dropdown = CustomDropdownMenu(widget=theme_btn)
+        theme_dropdown.add_option(option="Dark", command=lambda: change_theme("dark"))
+        theme_dropdown.add_option(option="Light", command=lambda: change_theme("light"))
+
+    def create_tab_view(self):
         global tab_view
         tab_view = MyTabView(self)
-        tab_view.grid(row=0, column=0, ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
+        tab_view.pack(ipadx=1920, ipady=1080, padx=20, pady=(5, 20))
 
 def main():
     app = App()
