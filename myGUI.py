@@ -126,7 +126,6 @@ class UserDecisionFrame(ctk.CTkFrame):
         # All generated sequence
         self.seq_gen = ctk.CTkEntry(self, font=("Ariel", 20))
         self.seq_gen.grid(row=0, column=0, padx=10, pady=10, sticky="nsew", columnspan=2)
-        print(type(self.seq_gen))
 
         # To generate next
         self.gen_next = ctk.CTkEntry(self, font=("Ariel", 20))
@@ -237,7 +236,7 @@ class BarChartFrame(ctk.CTkFrame):
 class MyTabView(ctk.CTkTabview):
 
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, segmented_button_unselected_color="grey30", segmented_button_fg_color="grey30")
         self.tab1 = self.add("Learning Tab")
         self.tab2 = self.add("Prediction Tab")
         self.tab3 = self.add("Evaluation Tab")
