@@ -145,10 +145,8 @@ class NetworkFrame(ctk.CTkFrame):
         edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
         try:
             if tab_view.get_sort_state():
-                print("Desc")
                 edges = [_ for _ in list(edge.keys())[-20:]]
             else:
-                print("Asec")
                 edges = [_ for _ in list(edge.keys())[:20]]
         except Exception as e:
             print(e)
@@ -407,8 +405,10 @@ class MyTabView(ctk.CTkTabview):
             try:
                 seq = [int(num) for num in seq_after_process.split(',')]
                 self.seq_list.append(seq)
-                history = random.randint(1, 10)
-                amount = random.randint(1, 5)
+                # history = random.randint(1, 10)
+                # amount = random.randint(1, 5)
+                history = 5
+                amount = 1
                 self.number_seq_frame.add_num_seq(seq, history=history, amount=amount)
             except Exception as e:
                 print(e)
@@ -458,7 +458,7 @@ class MyTabView(ctk.CTkTabview):
     def create_prediction_tab(self):
         self.switch_var = ctk.StringVar(value="off")
         self.tab2.grid_rowconfigure(1, weight=1)
-        self.tab2.grid_columnconfigure(7, weight=1)
+        self.tab2.grid_columnconfigure(8, weight=1)
 
         number_label = ctk.CTkLabel(self.tab2, text="Sequence: ")
         number_label.grid(row=0, column=0, padx=(0, 10))
@@ -484,20 +484,23 @@ class MyTabView(ctk.CTkTabview):
         gen_btn = ctk.CTkButton(self.tab2, text="Generate", command=self.generate_by_switch)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
 
+        self.generation_steps = ctk.CTkLabel(self.tab2, text="Step -/-", font=("Ariel", 20))
+        self.generation_steps.grid(row=0, column=7, sticky="w")
+
         self.switch = ctk.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.generate_by_switch,
                                         variable=self.switch_var, onvalue="on", offvalue="off")
-        self.switch.grid(row=0, column=7, sticky="e")
+        self.switch.grid(row=0, column=8, sticky="e")
 
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
         self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=3)
 
         self.all_route_frame = ctk.CTkScrollableFrame(self.tab2)
-        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), ipady=500, sticky="nsew", columnspan=4, rowspan=2)
+        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), ipady=500, sticky="nsew", columnspan=5, rowspan=2)
         self.all_route_frame.grid_rowconfigure(0, weight=1)
         self.all_route_frame.grid_columnconfigure(0, weight=1)
         
         self.gen_next_frame = ctk.CTkFrame(self.tab2)
-        self.gen_next_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
+        self.gen_next_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=5)
         self.gen_next_frame.grid_rowconfigure(0, weight=1)
         self.gen_next_frame.grid_columnconfigure(0, weight=1)
 
@@ -540,9 +543,14 @@ class MyTabView(ctk.CTkTabview):
 
             fig, ax = plt.subplots(figsize=(6,4), dpi=100)
 
+            ax.set_title(f"Graph_Learner")
+            ax.set_ylabel("Number")
+            ax.set_xlabel("Step")
+
             self.gen_num = []
             self.user_decision_frame.accept_btn.configure(state="normal")
             for i in range(step):
+                self.generation_steps.configure(text=f"Step {i+1}/{step}")
                 # Destroy the existing canvas if it exists
                 if hasattr(self.gen_next_frame, 'canvas'):
                     self.gen_next_frame.canvas.get_tk_widget().destroy()
@@ -599,16 +607,12 @@ class MyTabView(ctk.CTkTabview):
                         doc.add_doc(self.num, self.history)
                         self.seq_list.append(self.num)
                         self.show_checkmark("Sequence train successfully.")
-                        step = 0
                         break
 
                 except Exception as e:
                     print(f"Error get input from entry to num: {e}")
 
-                ax.set_title(f"Graph_Learner")
-                ax.set_ylabel("Number")
-                ax.set_xlabel("Step")
-
+            self.generation_steps.configure(text=f"Step -/-")
             # Destroy the existing canvas if it exists
             if hasattr(self.gen_next_frame, 'canvas'):
                 self.gen_next_frame.canvas.get_tk_widget().destroy()
@@ -689,7 +693,7 @@ class MyTabView(ctk.CTkTabview):
                 print(f"error: {e}")
                 
 
-            ax[-1].set_title(f"Graph_Learner {irow + 1}", loc='left')
+            ax[-1].set_title(f"Sequence {irow + 1}", loc='left')
             ax[-1].set_ylabel("Number")
             ax[-1].set_xlabel("Step")
 
