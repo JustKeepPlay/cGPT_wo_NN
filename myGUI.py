@@ -265,6 +265,9 @@ class MyTabView(ctk.CTkTabview):
         clear_entry_btn = ctk.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
         clear_entry_btn.grid(row=1, column=2, pady=(0, 10), sticky="w")
 
+        reset_data_btn = ctk.CTkButton(self.tab1, text="Reset Data", width=50, fg_color="red", command=lambda: self.ask_question("Ark you sure to reset learned data?"))
+        reset_data_btn.grid(row=1, column=2, pady=(0, 10), sticky="e")
+
         save_seq_btn = ctk.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
         save_seq_btn.grid(row=2, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
 
@@ -284,6 +287,19 @@ class MyTabView(ctk.CTkTabview):
 
         self.create_network = ctk.CTkButton(self.tab1, text="Create Network", command=self.train_data)
         self.create_network.grid(row=3, column=2, padx=(0, 10), pady=(0, 10))
+
+    def ask_question(self, msg):
+        # get yes/no answers
+        res_msg = CTkMessagebox(title="Reset Data", message=msg,
+                            icon="question", option_1="Cancle", option_2="No", option_3="Yes")
+        response = res_msg.get()
+        
+        if response=="Yes":
+            self.reset_data()
+
+    def reset_data(self):
+        doc.__init__(5, 'rand')
+        self.show_checkmark("Data reset successfully")
 
     def save_sequence(self):
         saved_sequences_dir = "Saved Sequences"
@@ -665,10 +681,11 @@ class MyTabView(ctk.CTkTabview):
             steps = len(self.num) + 1
 
             for seq in unique_sublists:
-                if len(seq) >= self.generate + 1:
+                if len(seq) >= self.generate + len(self.number):
                     if all(num in seq for num in self.num):
                         start_index = seq.index(self.num[0]) if self.num[0] in seq else -1
                         if start_index != -1 and start_index + len(self.num) <= len(seq):
+                            print(seq)
                             self.generated_list.append(seq[start_index:])
                             self.pred_seq_frame.add_generated_seq(str(self.generated_list[-1]))
 
@@ -677,6 +694,7 @@ class MyTabView(ctk.CTkTabview):
 
         # Destroy the existing canvas if it exists
         if hasattr(self.all_route_frame, 'canvas'):
+            print("all route frame clear")
             self.all_route_frame.canvas.get_tk_widget().destroy()
 
         fig = Figure(figsize=(6,4), dpi=100)
