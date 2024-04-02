@@ -145,11 +145,9 @@ class NetworkFrame(ctk.CTkFrame):
         edge = dict(sorted(edge_weights.items(), key=lambda item: item[1]))
         try:
             if tab_view.get_sort_state():
-                print("Desc")
-                edges = [_ for _ in list(edge.keys())[-10:]]
+                edges = [_ for _ in list(edge.keys())[-20:]]
             else:
-                print("Asec")
-                edges = [_ for _ in list(edge.keys())[:10]]
+                edges = [_ for _ in list(edge.keys())[:20]]
         except Exception as e:
             print(e)
 
@@ -186,6 +184,7 @@ class BarChartFrame(ctk.CTkFrame):
                 edges = [str(_) for _ in list(edge.keys())[-20:]]
                 values = list(edge.values())[-20:]
             else:
+                edge = dict(sorted(edge_weights.items(), key=lambda item: item[1], reverse=True))
                 edges = [str(_) for _ in list(edge.keys())[:20]]
                 values = list(edge.values())[:20]
         except Exception as e:
@@ -257,7 +256,7 @@ class MyTabView(ctk.CTkTabview):
 
         self.seq_entry = ctk.CTkEntry(self.tab1)
         self.seq_entry.grid(row=1, column=0, padx=(0, 10), pady=(0, 10), ipadx=100)
-        self.seq_entry.insert(0, "1,2,3,4,5")
+        # self.seq_entry.insert(0, "1,2,3,4,5")
         self.seq_entry.bind("<Return>", self.add_seq_enter)
 
         add_seq_btn = ctk.CTkButton(self.tab1, text="Add", width=30, command=self.get_seq)
@@ -265,6 +264,9 @@ class MyTabView(ctk.CTkTabview):
 
         clear_entry_btn = ctk.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
         clear_entry_btn.grid(row=1, column=2, pady=(0, 10), sticky="w")
+
+        reset_data_btn = ctk.CTkButton(self.tab1, text="Reset Data", width=50, fg_color="red", command=lambda: self.ask_question("Ark you sure to reset learned data?"))
+        reset_data_btn.grid(row=1, column=2, pady=(0, 10), sticky="e")
 
         save_seq_btn = ctk.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
         save_seq_btn.grid(row=2, column=0, padx=(0, 10), pady=(0, 10), sticky="w")
@@ -285,6 +287,19 @@ class MyTabView(ctk.CTkTabview):
 
         self.create_network = ctk.CTkButton(self.tab1, text="Create Network", command=self.train_data)
         self.create_network.grid(row=3, column=2, padx=(0, 10), pady=(0, 10))
+
+    def ask_question(self, msg):
+        # get yes/no answers
+        res_msg = CTkMessagebox(title="Reset Data", message=msg,
+                            icon="question", option_1="Cancle", option_2="No", option_3="Yes")
+        response = res_msg.get()
+        
+        if response=="Yes":
+            self.reset_data()
+
+    def reset_data(self):
+        doc.__init__(5, 'rand')
+        self.show_checkmark("Data reset successfully")
 
     def save_sequence(self):
         saved_sequences_dir = "Saved Sequences"
@@ -380,9 +395,9 @@ class MyTabView(ctk.CTkTabview):
             return result
         return input_values
 
-    def show_error(self):
+    def show_error(self, msg):
         # Show some error message
-        CTkMessagebox(title="Error", message="Non-numerical Sequence not allowed.", icon="cancel")
+        CTkMessagebox(title="Error", message=msg, icon="cancel")
 
     def isNumber(self, input_values):
         return all((i.strip().replace('.', '').isdigit() or i == '*' or i == "#" for i in item) for item in input_values.split(','))
@@ -398,7 +413,7 @@ class MyTabView(ctk.CTkTabview):
             except Exception as e:
                 print(f"Get Sequence error: {e}")
         else:
-            self.show_error()
+            self.show_error("Non-numerical Sequence not allowed.")
             
     def get_seq_from_upload(self, content_before_hash):
         if self.isNumber(content_before_hash):
@@ -406,13 +421,15 @@ class MyTabView(ctk.CTkTabview):
             try:
                 seq = [int(num) for num in seq_after_process.split(',')]
                 self.seq_list.append(seq)
-                history = random.randint(1, 10)
-                amount = random.randint(1, 5)
+                # history = random.randint(1, 10)
+                # amount = random.randint(1, 5)
+                history = 5
+                amount = 1
                 self.number_seq_frame.add_num_seq(seq, history=history, amount=amount)
             except Exception as e:
                 print(e)
         else:
-            self.show_error()
+            self.show_error("Non-numerical Sequence not allowed.")
 
     def upload_file(self):
         self.make_seq_file()
@@ -457,46 +474,49 @@ class MyTabView(ctk.CTkTabview):
     def create_prediction_tab(self):
         self.switch_var = ctk.StringVar(value="off")
         self.tab2.grid_rowconfigure(1, weight=1)
-        self.tab2.grid_columnconfigure(7, weight=1)
+        self.tab2.grid_columnconfigure(8, weight=1)
 
         number_label = ctk.CTkLabel(self.tab2, text="Sequence: ")
         number_label.grid(row=0, column=0, padx=(0, 10))
         self.number_field = ctk.CTkEntry(self.tab2)
         self.number_field.grid(row=0, column=1, padx=(0, 10), ipadx=20)
-        self.number_field.insert(0, "1,2")
+        # self.number_field.insert(0, "1,2")
         self.number_field.bind("<Return>", self.gen_seq_enter)
 
         history_label = ctk.CTkLabel(self.tab2, text="History: ")
         history_label.grid(row=0, column=2, padx=(0, 10))
         self.history_field = ctk.CTkEntry(self.tab2)
         self.history_field.grid(row=0, column=3, padx=(0, 10), ipadx=20)
-        self.history_field.insert(0, "5")
+        # self.history_field.insert(0, "5")
         self.history_field.bind("<Return>", self.gen_seq_enter)
 
         gen_label = ctk.CTkLabel(self.tab2, text="Generation Amount: ")
         gen_label.grid(row=0, column=4, padx=(0, 10))
         self.gen_field = ctk.CTkEntry(self.tab2)
         self.gen_field.grid(row=0, column=5, padx=(0, 10), ipadx=20)
-        self.gen_field.insert(0, "3")
+        # self.gen_field.insert(0, "3")
         self.gen_field.bind("<Return>", self.gen_seq_enter)
 
         gen_btn = ctk.CTkButton(self.tab2, text="Generate", command=self.generate_by_switch)
         gen_btn.grid(row=0, column=6, padx=(0, 10))
 
+        self.generation_steps = ctk.CTkLabel(self.tab2, text="Step -/-", font=("Ariel", 20))
+        self.generation_steps.grid(row=0, column=7, sticky="w")
+
         self.switch = ctk.CTkSwitch(self.tab2, text="Switch Graph/Network", command=self.generate_by_switch,
                                         variable=self.switch_var, onvalue="on", offvalue="off")
-        self.switch.grid(row=0, column=7, sticky="e")
+        self.switch.grid(row=0, column=8, sticky="e")
 
         self.pred_seq_frame = PredictSequenceFrame(self.tab2)
         self.pred_seq_frame.grid(row=1, column=0, padx=(0, 10), pady=(10, 0), sticky="nsew", columnspan=4, rowspan=3)
 
         self.all_route_frame = ctk.CTkScrollableFrame(self.tab2)
-        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), ipady=500, sticky="nsew", columnspan=4, rowspan=2)
+        self.all_route_frame.grid(row=1, column=4, padx=(0, 10), pady=(10, 0), ipady=500, sticky="nsew", columnspan=5, rowspan=2)
         self.all_route_frame.grid_rowconfigure(0, weight=1)
         self.all_route_frame.grid_columnconfigure(0, weight=1)
         
         self.gen_next_frame = ctk.CTkFrame(self.tab2)
-        self.gen_next_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=4)
+        self.gen_next_frame.grid(row=3, column=4, padx=(0, 10), pady=(10, 0), sticky="sew", columnspan=5)
         self.gen_next_frame.grid_rowconfigure(0, weight=1)
         self.gen_next_frame.grid_columnconfigure(0, weight=1)
 
@@ -516,13 +536,17 @@ class MyTabView(ctk.CTkTabview):
             print(e)
 
     def is_sequence_in_lists(self, num_list):
-        print(f"Check if in list: {num_list}")
+        print(f"Check if {num_list} in list")
         for lst in self.generated_list:
-            if all(item in lst for item in num_list):
-                print("Sequence exists")
-                return True
-        print("Sequence does not exists")
+            if len(num_list) > len(lst):
+                continue  # If num_list is longer than the current list, it can't be a subsequence
+            for i in range(len(lst) - len(num_list) + 1):
+                if lst[i:i+len(num_list)] == num_list:
+                    print("Sequence exists")
+                    return True
+        print("Sequence does not exist")
         return False
+
 
     def gen_next_by_one(self):
         try:
@@ -535,9 +559,14 @@ class MyTabView(ctk.CTkTabview):
 
             fig, ax = plt.subplots(figsize=(6,4), dpi=100)
 
+            ax.set_title(f"Graph_Learner")
+            ax.set_ylabel("Number")
+            ax.set_xlabel("Step")
+
             self.gen_num = []
             self.user_decision_frame.accept_btn.configure(state="normal")
             for i in range(step):
+                self.generation_steps.configure(text=f"Step {i+1}/{step}")
                 # Destroy the existing canvas if it exists
                 if hasattr(self.gen_next_frame, 'canvas'):
                     self.gen_next_frame.canvas.get_tk_widget().destroy()
@@ -581,36 +610,38 @@ class MyTabView(ctk.CTkTabview):
                 try:
                     self.num = self.gen_num[:-1]
                     print(f"self.num: {self.num}")
-                    self.num.extend([int(i) for i in self.user_decision_frame.gen_next.get().split(',')])
+                    try:
+                        next_value = self.user_decision_frame.gen_next.get().strip()  # Strip whitespace
+                        self.num.extend([int(i) for i in next_value.split(',') if i.strip()])
+                    except Exception as e:
+                        print(f"The gen_next error: {e}")
                     print(f"self.num after extend: {self.num}")
 
                     if (not self.is_sequence_in_lists(self.num)):
+                        print("here")
                         print(f"{self.num} not in learning")
                         doc.add_doc(self.num, self.history)
                         self.seq_list.append(self.num)
-                        self.generate_all_possible_route()
                         self.show_checkmark("Sequence train successfully.")
-                    else:
-                        # Destroy the existing canvas if it exists
-                        if hasattr(self.gen_next_frame, 'canvas'):
-                            self.gen_next_frame.canvas.get_tk_widget().destroy()
-                        
-                        ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
-                        for i, value in enumerate(self.num):
-                            ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
-
-                        canvas = FigureCanvasTkAgg(fig, master=self.gen_next_frame)
-                        self.gen_next_frame.canvas = canvas
-                        canvas.draw()
-                        canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+                        break
 
                 except Exception as e:
                     print(f"Error get input from entry to num: {e}")
 
-                ax.set_title(f"Graph_Learner")
-                ax.set_ylabel("Number")
-                ax.set_xlabel("Step")
+            self.generation_steps.configure(text=f"Step -/-")
+            # Destroy the existing canvas if it exists
+            if hasattr(self.gen_next_frame, 'canvas'):
+                self.gen_next_frame.canvas.get_tk_widget().destroy()
+            
+            ax.plot(range(1, len(self.num) + 1, 1), self.num, marker='o', color='blue')
+            for i, value in enumerate(self.num):
+                ax.text(i + 1, value, str(value), color='blue', ha='right', va='bottom')  # Display the value on each marker
 
+            canvas = FigureCanvasTkAgg(fig, master=self.gen_next_frame)
+            self.gen_next_frame.canvas = canvas
+            canvas.draw()
+            canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+            
             self.user_decision_frame.var.set(0)
             self.user_decision_frame.seq_gen.configure(state="normal")
             self.user_decision_frame.gen_next.configure(state="normal")
@@ -647,22 +678,23 @@ class MyTabView(ctk.CTkTabview):
             if self.generated_list:
                 self.generated_list.clear()
 
-            # steps = len(self.number) + self.generate
             steps = len(self.num) + 1
 
             for seq in unique_sublists:
-                if len(seq) >= steps:
+                if len(seq) >= self.generate + len(self.number):
                     if all(num in seq for num in self.num):
                         start_index = seq.index(self.num[0]) if self.num[0] in seq else -1
-                        if start_index != -1 and seq[start_index:start_index + len(self.num)] == self.num:
+                        if start_index != -1 and start_index + len(self.num) <= len(seq):
+                            print(seq)
                             self.generated_list.append(seq[start_index:])
                             self.pred_seq_frame.add_generated_seq(str(self.generated_list[-1]))
-                            
+
         except Exception as e:
             print(f"Seq list problem: {e}")
 
         # Destroy the existing canvas if it exists
         if hasattr(self.all_route_frame, 'canvas'):
+            print("all route frame clear")
             self.all_route_frame.canvas.get_tk_widget().destroy()
 
         fig = Figure(figsize=(6,4), dpi=100)
@@ -679,7 +711,7 @@ class MyTabView(ctk.CTkTabview):
                 print(f"error: {e}")
                 
 
-            ax[-1].set_title(f"Graph_Learner {irow + 1}", loc='left')
+            ax[-1].set_title(f"Sequence {irow + 1}", loc='left')
             ax[-1].set_ylabel("Number")
             ax[-1].set_xlabel("Step")
 
