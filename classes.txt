@@ -5,13 +5,13 @@ NumberSequenceFrame
 +checklists: list
 +checked_checklists: list
 +select_all()
-+add_num_seq()
++add_num_seq(seq, history, amount)
 +get_checklist()
 
 PredictSequenceFrame
 +saved_seq_generated_list: list
 +generated_widgets: dict
-+add_generated_seq()
++add_generated_seq(seq)
 +destroy_generated_widgets()
 
 UserDecisionFrame
@@ -19,6 +19,7 @@ UserDecisionFrame
 +seq_gen: CTkEntry
 +gen_next: CTkEntry
 +accept_btn: CTkButton
++create_frame()
 
 NetworkFrame
 +network_fig: Figure
@@ -56,6 +57,8 @@ MyTabView
 +bar_chart_frame: CTkFrame
 +sort_btn: CTkButton
 +create_learning_tab()
++ask_question(msg)
++reset_data()
 +save_sequence()
 +add_seq_enter(event)
 +generate_sequence()

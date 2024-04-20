@@ -265,7 +265,7 @@ class MyTabView(ctk.CTkTabview):
         clear_entry_btn = ctk.CTkButton(self.tab1, text="Clear", width=30, command=self.clear_entry)
         clear_entry_btn.grid(row=1, column=2, pady=(0, 10), sticky="w")
 
-        reset_data_btn = ctk.CTkButton(self.tab1, text="Reset Data", width=50, fg_color="red", command=lambda: self.ask_question("Ark you sure to reset learned data?"))
+        reset_data_btn = ctk.CTkButton(self.tab1, text="Reset Data", width=50, fg_color="red", command=lambda: self.ask_question("Are you sure?"))
         reset_data_btn.grid(row=1, column=2, pady=(0, 10), sticky="e")
 
         save_seq_btn = ctk.CTkButton(self.tab1, text="Save Sequence", fg_color="green", hover_color="darkgreen", command=self.save_sequence)
